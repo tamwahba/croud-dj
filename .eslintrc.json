@@ -1,0 +1,10 @@
+{
+  "extends": "airbnb",
+  "plugins": [
+    "import",
+    "jsx-a11y",
+    "mocha",
+    "react"
+  ],
+  "root": true
+}

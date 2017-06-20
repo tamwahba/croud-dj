@@ -1,0 +1,10 @@
+# Ouput
+node_modules/
+coverage/
+reports/
+site/
+
+# macOS
+__MACOSX/
+.DS_Store
+Thumbs.db

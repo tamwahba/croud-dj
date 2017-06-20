@@ -1,0 +1,8 @@
+machine:
+  node:
+    version: 6.1.0
+
+test:
+  post:
+    - mv ./coverage ${CIRCLE_ARTIFACTS}
+    - mv ./reports ${CIRCLE_TEST_REPORTS}/junit
