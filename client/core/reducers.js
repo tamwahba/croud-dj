@@ -1,5 +1,9 @@
 import { combineReducers } from 'redux';
 
+import { youtubeAPIReducer } from './youtube/api';
+import { youtubePlayerReducer } from './youtube/player';
+
 export default combineReducers({
-  tmp: () => ({}),
+  youtubeAPI: youtubeAPIReducer,
+  youtubePlayer: youtubePlayerReducer,
 });
