@@ -1,7 +1,7 @@
 export { currentSongBuffering,
   currentSongElapsed,
   currentSongError,
-  currentSongPause,
+  currentSongPaused,
   currentSongPlaying,
   currentSongUpdate } from './actions';
 export { CurrentSongStatuses, CurrentSongTypes } from './enums';
