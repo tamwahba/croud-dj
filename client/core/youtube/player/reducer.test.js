@@ -1,14 +1,14 @@
 /* eslint-env mocha */
 import expect from 'expect';
 
-import { loadYoutubePlayer,
+import { loadYoutubePlayerStart,
   loadYoutubePlayerSucceeded,
   loadYoutubePlayerFailed } from './actions';
 import { YoutubePlayerState, youtubePlayerReducer } from './reducer';
 
 describe('core', () => {
   describe('youtube', () => {
-    describe('api', () => {
+    describe('player', () => {
       describe('reducer', () => {
         it('should correctly return state when called with undefined', () => {
           const defaultState = new YoutubePlayerState();
@@ -24,7 +24,8 @@ describe('core', () => {
             player: null,
           });
 
-          expect(youtubePlayerReducer(undefined, loadYoutubePlayer())).toEqualImmutable(newState);
+          expect(youtubePlayerReducer(undefined, loadYoutubePlayerStart()))
+            .toEqualImmutable(newState);
         });
 
         it('should correctly return state for YOUTUBE_PLAYER_READY', () => {

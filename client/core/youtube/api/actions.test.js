@@ -1,6 +1,8 @@
 /* eslint-env mocha, browser */
 import expect from 'expect';
 
+import { mockDispatch } from '../../test-utils';
+
 import {
   YOUTUBE_API_FETCH_START,
   YOUTUBE_API_FETCH_SUCCESS,
@@ -42,13 +44,6 @@ describe('core', () => {
         });
 
         describe('loadYoutubeAPI', () => {
-          function mockDispatch(expectedActions) {
-            return (action) => {
-              const expectedAction = expectedActions.shift();
-              expect(action.type).toEqual(expectedAction.type);
-            };
-          }
-
           afterEach(() => {
             const script = document
               .querySelector('script[src="https://www.youtube.com/iframe_api"]');
