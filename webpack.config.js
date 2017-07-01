@@ -14,10 +14,17 @@ const HOST = process.env.HOST || '0.0.0.0';
 const PORT = process.env.PORT || 3000;
 
 const loaders = {
+  font: {
+    test: /\.(ttf|eot|woff|woff2)$/,
+    loader: 'file-loader',
+    options: {
+      name: 'fonts/[name].[ext]',
+    },
+  },
   js: { test: /\.jsx?$/, exclude: /node_modules/, loader: ['babel-loader'] },
   json: { test: /\.json$/, loader: ['json-loader'] },
   less: {
-    test: /\.less$/,
+    test: /\.(less|css)$/,
     loaders: ['style-loader', 'css-loader', 'postcss-loader', 'less-loader'],
   },
 };
@@ -60,6 +67,7 @@ if (IS_DEVELOPMENT) {
     'webpack/hot/only-dev-server');
   config.module = {
     rules: [
+      loaders.font,
       loaders.js,
       loaders.less,
     ],
@@ -93,6 +101,7 @@ if (IS_PRODUCTION) {
   config.output.filename = '[name].[chunkhash].js';
   config.module = {
     rules: [
+      loaders.font,
       loaders.js,
       {
         test: /\.less$/,
@@ -148,6 +157,7 @@ if (IS_TEST) {
   config.devtool = 'inline-source-map';
   config.module = {
     rules: [
+      loaders.font,
       loaders.js,
       loaders.json,
       loaders.less,

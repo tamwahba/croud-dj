@@ -1,0 +1,43 @@
+@import '../../styles/constants.less';
+
+.now-playing {
+  align-items: center;
+  background-color: @primary-color;
+  display: flex;
+  flex-direction: column;
+  left: 0;
+  position: fixed;
+  top: 0;
+  width: 100%;
+
+  &__heading {
+    margin: 2px 0;
+  }
+
+  &__info {
+    align-content: center;
+    align-items: center;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    margin: 2px 0;
+    width: 100%;
+
+    &__controls {
+      flex-shrink: 2;
+      margin: auto 2px;
+    }
+
+    &__duration {
+      flex-shrink: 0;
+      margin: auto 2px;
+    }
+
+    &__progress-bar {
+      flex-shrink: 0;
+      height: 4px;
+      margin: auto 2px;
+      width: 40%;
+    }
+  }
+}

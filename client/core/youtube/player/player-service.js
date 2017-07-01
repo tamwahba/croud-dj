@@ -12,7 +12,6 @@ export function initializeYoutubePlayer(api, containerID, events, shouldReset) {
     player = new api.Player(containerID, {
       events: {
         onReady: () => {
-          // console.log('ready', player);
           resolve(player);
         },
         onError: (error) => {
