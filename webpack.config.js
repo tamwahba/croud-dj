@@ -104,7 +104,7 @@ if (IS_PRODUCTION) {
       loaders.font,
       loaders.js,
       {
-        test: /\.less$/,
+        test: /\.(less|css)$/,
         loader: ExtractTextPlugin.extract({
           fallback: 'style-loader',
           use: [
