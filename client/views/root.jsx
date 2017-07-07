@@ -5,13 +5,17 @@ import { BrowserRouter, Route } from 'react-router-dom';
 
 import App from './app/index';
 import HomePage from './pages/home';
+import HostPage from './pages/host';
 
 function Root({ store }) {
   return (
     <Provider store={store}>
       <BrowserRouter>
         <App>
-          <Route exact path="/" component={HomePage} />
+          <div>
+            <Route exact path="/" component={HomePage} />
+            <Route exact path="/host" component={HostPage} />
+          </div>
         </App>
       </BrowserRouter>
     </Provider>

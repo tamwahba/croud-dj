@@ -5,7 +5,8 @@ import { AppContainer } from 'react-hot-loader';
 import configureStore from './core/store';
 import Root from './views/root';
 
-import './views/styles/styles.less';
+import 'normalize.css';
+import './views/styles/base.less';
 
 const rootElement = document.getElementById('root');
 const store = configureStore();

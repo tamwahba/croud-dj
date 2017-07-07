@@ -28,7 +28,7 @@ module.exports = (config) => {
     logLevel: config.LOG_INFO,
     autoWatch: true,
     singleRun: false,
-    browsers: ['Firefox'],
+    browsers: ['Chrome'],
   };
 
   config.set(options);

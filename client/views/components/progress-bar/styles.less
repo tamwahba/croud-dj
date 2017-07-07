@@ -1,0 +1,16 @@
+@import '../../styles/constants.less';
+
+.progress-bar {
+      background-color: @secondary-color;
+      position: relative;
+
+      &__completed {
+        transition: width linear 550ms;
+        background-color: darken(@secondary-color, 10%);
+        bottom: 0;
+        left: 0;
+        position: absolute;
+        right: 0;
+        top: 0;
+      }
+    }
