@@ -50,12 +50,18 @@ if (IS_DEVELOPMENT || IS_PRODUCTION) {
     path: path.resolve('./site'),
     publicPath: '/',
   };
-  config.plugins.push(new HtmlWebpackPlugin({
-    filename: 'index.html',
-    hash: false,
-    inject: 'body',
-    template: './client/index.html',
-  }));
+  config.plugins.push(
+    new webpack.DefinePlugin({
+      'process.env.FIREBASE_API_KEY': JSON.stringify(process.env.FIREBASE_API_KEY),
+      'process.env.FIREBASE_AUTH_DOMAIN': JSON.stringify(process.env.FIREBASE_AUTH_DOMAIN),
+      'process.env.FIREBASE_DB_URL': JSON.stringify(process.env.FIREBASE_DB_URL),
+    }),
+    new HtmlWebpackPlugin({
+      filename: 'index.html',
+      hash: false,
+      inject: 'body',
+      template: './client/index.html',
+    }));
 }
 
 if (IS_DEVELOPMENT) {
