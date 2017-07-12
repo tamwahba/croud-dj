@@ -285,7 +285,7 @@ describe('core', () => {
               }).then(() => expect(expectedActions.length).toEqual(0));
           });
 
-          it('should dispatch paused action once when shouldReset is false', () => {
+          it('should recreate player when container is different', () => {
             const expectedActions = [
               loadYoutubePlayerStart(),
               loadYoutubePlayerSucceeded(),
@@ -293,17 +293,40 @@ describe('core', () => {
               loadYoutubePlayerSucceeded(),
             ];
 
-            const custom = {
-              Player: () => ({}),
-            };
+            const load = loadYoutubePlayer(api, 'container', true)(mockDispatch(expectedActions), getState);
+
+            player.ready();
+
+            player = Object.assign({}, player);
+
+            return load
+              .then(() => {
+                const secondLoad = loadYoutubePlayer(api, 'different-container')(mockDispatch(expectedActions), getState);
+                player.ready();
+                return secondLoad;
+              })
+              .then(p => expect(p).toBe(player))
+              .then(() => expect(expectedActions.length).toEqual(0));
+          });
+
+          it('should not recreate player when shouldReset is false', () => {
+            const expectedActions = [
+              loadYoutubePlayerStart(),
+              loadYoutubePlayerSucceeded(),
+              loadYoutubePlayerStart(),
+              loadYoutubePlayerSucceeded(),
+            ];
 
             const load = loadYoutubePlayer(api, 'container', true)(mockDispatch(expectedActions), getState);
 
             player.ready();
 
+            const originalPlayer = player;
+            player = Object.assign({}, player);
+
             return load
-              .then(() => loadYoutubePlayer(custom, 'container')(mockDispatch(expectedActions), getState))
-              .then(p => expect(p).toEqual(player))
+              .then(() => loadYoutubePlayer(api, 'container')(mockDispatch(expectedActions), getState))
+              .then(p => expect(p).toBe(originalPlayer))
               .then(() => expect(expectedActions.length).toEqual(0));
           });
         });

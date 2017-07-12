@@ -10,9 +10,16 @@ import './styles.less';
 
 export class YoutubePlayer extends React.Component {
   componentDidMount() {
-    const { dispatch } = this.props;
+    const { dispatch, songID, songPosition } = this.props;
     dispatch(loadYoutubeAPI())
-      .then(api => dispatch(loadYoutubePlayer(api, 'youtube-player')));
+      .then((api) => {
+        dispatch(loadYoutubePlayer(api, this.iframe))
+          .then((player) => {
+            if (songID) {
+              player.loadVideoById(songID, songPosition);
+            }
+          });
+      });
   }
 
   componentWillReceiveProps(nextProps) {
@@ -39,6 +46,7 @@ export class YoutubePlayer extends React.Component {
   render() {
     return (
       <iframe
+        ref={(iframe) => { this.iframe = iframe; }}
         id="youtube-player"
         title="Youtube Player"
         className="youtube-player"
@@ -56,6 +64,7 @@ YoutubePlayer.propTypes = {
     playVideo: PropTypes.func.isRequired,
   }),
   songID: PropTypes.string.isRequired,
+  songPosition: PropTypes.number.isRequired,
   status: PropTypes.string.isRequired,
 };
 
@@ -63,6 +72,7 @@ function mapStateToProps(state) {
   return {
     player: state.youtube.player.player,
     songID: state.currentSong.id,
+    songPosition: state.currentSong.elapsed,
     status: state.currentSong.status,
   };
 }

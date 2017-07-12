@@ -11,13 +11,13 @@ expect.extend(enzymify());
 describe('views', () => {
   describe('components', () => {
     describe('youtube-player', () => {
-      const promise = Promise.resolve();
-      const mockDispatch = expect.createSpy().andReturn(promise);
       const mockPlayer = {
         loadVideoById: expect.createSpy(),
         pauseVideo: expect.createSpy(),
         playVideo: expect.createSpy(),
       };
+      const promise = Promise.resolve(mockPlayer);
+      const mockDispatch = expect.createSpy().andReturn(promise);
       let youtubePlayer;
 
       beforeEach(() => {
@@ -26,7 +26,13 @@ describe('views', () => {
         mockPlayer.pauseVideo.reset();
         mockPlayer.playVideo.reset();
         youtubePlayer = shallow(
-          <YoutubePlayer songID="" status="" dispatch={mockDispatch} player={mockPlayer} />);
+          <YoutubePlayer
+            songID=""
+            songPosition={0}
+            status=""
+            dispatch={mockDispatch}
+            player={mockPlayer}
+          />);
       });
 
       it('should render an iframe', () => {
@@ -39,9 +45,43 @@ describe('views', () => {
 
       it('should call dispatch twice when mounted', () => {
         youtubePlayer = mount(
-          <YoutubePlayer songID="" status="" dispatch={mockDispatch} player={mockPlayer} />);
+          <YoutubePlayer
+            songID=""
+            songPosition={0}
+            status=""
+            dispatch={mockDispatch}
+            player={mockPlayer}
+          />);
 
         return promise.then().then().then(() => expect(mockDispatch.calls.length).toEqual(2));
+      });
+
+      it('should call player.loadVideoById when songID is truthy when mounted', () => {
+        youtubePlayer = mount(
+          <YoutubePlayer
+            songID="s"
+            songPosition={0}
+            status=""
+            dispatch={mockDispatch}
+            player={mockPlayer}
+          />);
+
+        return promise.then().then().then(
+          () => expect(mockPlayer.loadVideoById).toHaveBeenCalled());
+      });
+
+      it('should NOT call player.loadVideoById when songID is NOT truthy when mounted', () => {
+        youtubePlayer = mount(
+          <YoutubePlayer
+            songID=""
+            songPosition={0}
+            status=""
+            dispatch={mockDispatch}
+            player={mockPlayer}
+          />);
+
+        return promise.then().then().then(
+          () => expect(mockPlayer.loadVideoById).toNotHaveBeenCalled());
       });
 
       it('should call player.loadVideoById when songID changes', () => {

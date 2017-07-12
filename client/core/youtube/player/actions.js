@@ -30,11 +30,11 @@ export function loadYoutubePlayerFailed() {
   };
 }
 
-export function loadYoutubePlayer(api, containerID, shouldReset = false) {
+export function loadYoutubePlayer(api, container, shouldReset = false) {
   return (dispatch, getState) => {
     dispatch(loadYoutubePlayerStart());
 
-    return initializeYoutubePlayer(api, containerID, {
+    return initializeYoutubePlayer(api, container, {
       onBuffering: () => dispatch(currentSongBuffering()),
       onDurationUpdated: duration => dispatch(currentSongUpdate({ duration })),
       onError: () => dispatch(currentSongError()),

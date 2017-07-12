@@ -1,17 +1,21 @@
+let container;
 let interval;
 let player;
 
-export function initializeYoutubePlayer(api, containerID, events, shouldReset) {
+export function initializeYoutubePlayer(api, newContainer, events, shouldReset) {
   const { onBuffering, onDurationUpdated, onError, onPaused, onPlaying, onTimeUpdated } = events;
 
-  if (player && !shouldReset) {
+  if (player && container === newContainer && !shouldReset) {
     return Promise.resolve(player);
   }
 
   return new Promise((resolve, reject) => {
-    player = new api.Player(containerID, {
+    clearInterval(interval);
+
+    player = new api.Player(newContainer, {
       events: {
         onReady: () => {
+          container = newContainer;
           resolve(player);
         },
         onError: (error) => {
