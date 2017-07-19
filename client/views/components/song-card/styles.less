@@ -1,0 +1,49 @@
+@import '../../styles/constants.less';
+
+.song-card {
+  align-items: center;
+  background-color: white;
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: center;
+  width: 100%;
+
+  &__accessory {
+    flex-grow: 1;
+    margin: 0 6px;
+  }
+
+  &__artist {
+    margin: 3px 0;
+  }
+
+  &__artwork-container {
+    flex-basis: 220px;
+    flex-shrink: 1;
+
+    img {
+      max-height: 100%;
+      max-width: 100%;
+    }
+  }
+
+  &__group {
+    display: flex;
+    flex-basis: 80px;
+    flex-direction: column;
+    flex-grow: 100;
+    flex-shrink: 1;
+    margin: 0 3px;
+    overflow-x: hidden;
+
+    span {
+      overflow-x: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+  &__title {
+    font-size: 14px;
+    margin: 3px 0;
+  }
+}

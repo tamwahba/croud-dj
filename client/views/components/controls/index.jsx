@@ -7,6 +7,8 @@ import { currentSongPaused,
   currentSongUpdate,
   CurrentSongStatuses } from '../../../core/current-song';
 
+import Button from '../button';
+
 import './styles.less';
 
 export function Controls(props) {
@@ -14,24 +16,24 @@ export function Controls(props) {
 
   switch (props.status) {
     case CurrentSongStatuses.BUFFERING:
-      statusButton = <button className="controls__button controls__button--status">Loading</button>;
+      statusButton = <Button className="controls__button controls__button--status">Loading</Button>;
       break;
     case CurrentSongStatuses.ERROR:
-      statusButton = <button className="controls__button controls__button--status">Error</button>;
+      statusButton = <Button className="controls__button controls__button--status">Error</Button>;
       break;
     case CurrentSongStatuses.PAUSED:
       statusButton = (
-        <button
+        <Button
           className="controls__button"
           onClick={props.onClickPlay}
-        >Play</button>);
+        >Play</Button>);
       break;
     case CurrentSongStatuses.PLAYING:
       statusButton = (
-        <button
+        <Button
           className="controls__button"
           onClick={props.onClickPause}
-        >Pause</button>);
+        >Pause</Button>);
       break;
     default:
       break;
@@ -40,7 +42,7 @@ export function Controls(props) {
   return (
     <div className={`controls ${props.className}`}>
       {statusButton}
-      <button className="controls__button" onClick={props.onClickNext}>Next</button>
+      <Button className="controls__button" onClick={props.onClickNext}>Next</Button>
     </div>
   );
 }

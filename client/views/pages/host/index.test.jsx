@@ -6,6 +6,8 @@ import React from 'react';
 
 import { UnconnectedHostPage } from './index';
 
+import { SongListState } from '../../../core/song-lists';
+
 expect.extend(enzymify());
 
 describe('views', () => {
@@ -20,6 +22,8 @@ describe('views', () => {
             dispatch={dispatch}
             match={{ params: { room: 'name' } }}
             room={{ name: 'name', isLoading: false, isValid: true }}
+            played={new SongListState()}
+            queue={new SongListState()}
           />);
       });
 
@@ -27,11 +31,11 @@ describe('views', () => {
         dispatch.reset();
       });
 
-      it('should have a top padding', () => {
-        expect(host.getNode().props.style.padding).toEqual('75px 0 0 0');
+      it('should have class `.host`', () => {
+        expect(host).toHaveClass('host');
       });
 
-      it('should call dispatch on url change', () => {
+      it('should call dispatch on navigation change', () => {
         expect(dispatch.calls.length).toEqual(1);
       });
 
@@ -46,19 +50,7 @@ describe('views', () => {
         expect(dispatch.calls.length).toEqual(2);
       });
 
-      it('should render a loading screen when room.isLoading is true', () => {
-        host.setProps({
-          room: {
-            name: '',
-            isLoading: true,
-            isValid: false,
-          },
-        });
-
-        expect(host).toHaveRendered(<div><h2>Looking for room...</h2></div>);
-      });
-
-      it('should render a loading screen when room.isValid is false', () => {
+      it('should render a loading screen when room.isValid and room.isLoading are false', () => {
         host.setProps({
           room: {
             name: '',

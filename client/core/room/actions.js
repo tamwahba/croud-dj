@@ -1,4 +1,5 @@
 import { checkRoomExists } from '../firebase';
+import { watchSongList } from '../song-lists';
 
 export const ROOM_CHANGED = 'ROOM_CHANGED';
 export const ROOM_LOADING = 'ROOM_LOADING';
@@ -22,7 +23,11 @@ export function changeRoom(name, check = checkRoomExists) {
     dispatch(roomLoading());
 
     return check(name)
-      .then(confirmedName => dispatch(roomChanged(confirmedName, true)))
+      .then((ref) => {
+        dispatch(roomChanged(ref.key, true));
+        dispatch(watchSongList(ref.child('queue').orderByChild('votes'), `${ref.key}-queue`));
+        dispatch(watchSongList(ref.child('played'), `${ref.key}-played`));
+      })
       .catch(() => dispatch(roomChanged(name, false)));
   };
 }

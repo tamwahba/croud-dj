@@ -91,6 +91,7 @@
     "sinon": "^2.3.4",
     "style-loader": "^0.18.2",
     "supertest": "^3.0.0",
+    "svg-sprite-loader": "^3.0.5",
     "tap-xunit": "^1.7.0",
     "webpack": "^2.6.1",
     "webpack-dev-server": "^2.4.5",

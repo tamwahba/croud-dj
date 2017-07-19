@@ -12,7 +12,7 @@ export function checkRoomExists(roomName, database = app.database()) {
   return new Promise((resolve, reject) => {
     database.ref(`rooms/${roomName}`).once('value', (ds) => {
       if (ds.exists()) {
-        resolve(ds.key);
+        resolve(ds.ref);
       } else {
         reject();
       }

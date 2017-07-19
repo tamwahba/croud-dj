@@ -50,6 +50,7 @@ describe('core', () => {
           const expectedActions = [
             roomLoading(),
             roomChanged(),
+            roomChanged(), // happens when thunk dispatches fail
           ];
           const name = 'name';
 

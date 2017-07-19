@@ -1,4 +1,6 @@
 /* eslint-env mocha */
+import expect from 'expect';
+
 import { checkRoomExists } from './service';
 
 describe('core', () => {
@@ -11,6 +13,7 @@ describe('core', () => {
             once: (op, callback) => {
               callback({
                 exists: () => roomExists,
+                ref: 'fake-ref',
               });
             },
           }),
@@ -24,6 +27,13 @@ describe('core', () => {
           roomExists = true;
 
           return checkRoomExists('', mockDatabse);
+        });
+
+        it('should resolve with reference when room exists', () => {
+          roomExists = true;
+
+          return checkRoomExists('', mockDatabse)
+            .then(ref => expect(ref).toEqual('fake-ref'));
         });
 
         it('should reject when room does not exist', () => {
