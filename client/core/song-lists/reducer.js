@@ -1,21 +1,12 @@
 import { List, Map, Record } from 'immutable';
 
+import { SongState } from '../song';
+
 import { SONG_LISTS_LIST_LOADED,
   SONG_LISTS_SONG_ADDED,
   SONG_LISTS_SONG_CHANGED,
   SONG_LISTS_SONG_MOVED,
   SONG_LISTS_SONG_REMOVED } from './actions';
-
-export const SongState = new Record({
-  addedBy: '',
-  artist: '',
-  artwork: '',
-  duration: 0,
-  id: '',
-  title: '',
-  service: '',
-  votes: 0,
-});
 
 export const SongListState = new Record({
   order: List(),

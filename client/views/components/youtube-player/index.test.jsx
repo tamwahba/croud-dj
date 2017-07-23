@@ -31,8 +31,8 @@ describe('views', () => {
             songPosition={0}
             status=""
             dispatch={mockDispatch}
-            player={mockPlayer}
           />);
+        youtubePlayer.setState({ loadYoutube: promise });
       });
 
       it('should render an iframe', () => {
@@ -50,7 +50,6 @@ describe('views', () => {
             songPosition={0}
             status=""
             dispatch={mockDispatch}
-            player={mockPlayer}
           />);
 
         return promise.then().then().then(() => expect(mockDispatch.calls.length).toEqual(2));
@@ -63,7 +62,6 @@ describe('views', () => {
             songPosition={0}
             status=""
             dispatch={mockDispatch}
-            player={mockPlayer}
           />);
 
         return promise.then().then().then(
@@ -77,7 +75,6 @@ describe('views', () => {
             songPosition={0}
             status=""
             dispatch={mockDispatch}
-            player={mockPlayer}
           />);
 
         return promise.then().then().then(
@@ -86,23 +83,32 @@ describe('views', () => {
 
       it('should call player.loadVideoById when songID changes', () => {
         youtubePlayer.setProps({ songID: 's' });
-        expect(mockPlayer.loadVideoById).toHaveBeenCalled();
+
+        return promise.then().then().then(
+          () => expect(mockPlayer.loadVideoById).toHaveBeenCalled());
       });
 
       it('should call player.pauseVideo when status changes to PAUSED', () => {
         youtubePlayer.setProps({ status: 'PAUSED' });
-        expect(mockPlayer.pauseVideo).toHaveBeenCalled();
+
+        return promise.then().then().then(
+          () => expect(mockPlayer.pauseVideo).toHaveBeenCalled());
       });
 
       it('should call player.playVideo when status changes to PLAYING', () => {
         youtubePlayer.setProps({ status: 'PLAYING' });
-        expect(mockPlayer.playVideo).toHaveBeenCalled();
+
+        return promise.then().then().then(
+          () => expect(mockPlayer.playVideo).toHaveBeenCalled());
       });
 
       it('should not call anything when status changes to anything else', () => {
         youtubePlayer.setProps({ status: '_' });
-        expect(mockPlayer.playVideo).toNotHaveBeenCalled();
-        expect(mockPlayer.pauseVideo).toNotHaveBeenCalled();
+
+        return promise.then().then().then(() => {
+          expect(mockPlayer.playVideo).toNotHaveBeenCalled();
+          expect(mockPlayer.pauseVideo).toNotHaveBeenCalled();
+        });
       });
     });
   });

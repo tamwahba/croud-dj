@@ -1,40 +1,7 @@
-export const CURRENT_SONG_BUFFERING = 'CURRENT_SONG_BUFFERING';
-export const CURRENT_SONG_ELAPSED = 'CURRENT_SONG_ELAPSED';
-export const CURRENT_SONG_ERROR = 'CURRENT_SONG_ERROR';
-export const CURRENT_SONG_PAUSED = 'CURRENT_SONG_PAUSED';
-export const CURRENT_SONG_PLAYING = 'CURRENT_SONG_PLAYING';
+import { app } from '../firebase';
+import { SongStatuses } from '../song';
+
 export const CURRENT_SONG_UPDATE = 'CURRENT_SONG_UPDATE';
-
-export function currentSongBuffering() {
-  return {
-    type: CURRENT_SONG_BUFFERING,
-  };
-}
-
-export function currentSongElapsed(time) {
-  return {
-    type: CURRENT_SONG_ELAPSED,
-    elapsed: time,
-  };
-}
-
-export function currentSongError() {
-  return {
-    type: CURRENT_SONG_ERROR,
-  };
-}
-
-export function currentSongPaused() {
-  return {
-    type: CURRENT_SONG_PAUSED,
-  };
-}
-
-export function currentSongPlaying() {
-  return {
-    type: CURRENT_SONG_PLAYING,
-  };
-}
 
 export function currentSongUpdate(song) {
   return {
@@ -42,3 +9,51 @@ export function currentSongUpdate(song) {
     song,
   };
 }
+
+export function watchCurrentSong(firebaseRef) {
+  return (dispatch) => {
+    firebaseRef.on('value', (ds) => {
+      dispatch(currentSongUpdate(ds.val()));
+    });
+  };
+}
+
+export function changeCurrentSong(song, database = app.database()) {
+  return (_, getState) => {
+    const roomName = getState().room.name;
+    database.ref(`rooms/${roomName}/nowPlaying`).set(song);
+  };
+}
+
+export function updateCurrentSong(s, database = app.database()) {
+  return (_, getState) => {
+    const song = getState().currentSong.merge(s).toJS();
+    const roomName = getState().room.name;
+    database.ref(`rooms/${roomName}/nowPlaying`).set(song);
+  };
+}
+
+export function updateCurrentSongElapsed(elapsed, database = app.database()) {
+  return (_, getState) => {
+    const roomName = getState().room.name;
+    database.ref(`rooms/${roomName}/nowPlaying/elapsed`).set(elapsed);
+  };
+}
+
+export function updateCurrentSongStatus(status, database = app.database()) {
+  return (_, getState) => {
+    if (getState().currentSong.status !== status) {
+      const roomName = getState().room.name;
+      database.ref(`rooms/${roomName}/nowPlaying/status`).set(status);
+    }
+  };
+}
+
+export function pauseCurrentSong(database = app.database()) {
+  return updateCurrentSongStatus(SongStatuses.PAUSED, database);
+}
+
+export function playCurrentSong(database = app.database()) {
+  return updateCurrentSongStatus(SongStatuses.PLAYING, database);
+}
+

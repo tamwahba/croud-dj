@@ -3,12 +3,14 @@ import expect from 'expect';
 import expectImmutable from 'expect-immutable';
 import { List, Map } from 'immutable';
 
+import { SongState } from '../song';
+
 import { songListsLoad,
   songListsSongAdd,
   songListsSongChange,
   songListsSongMove,
   songListsSongRemove } from './actions';
-import { SongState, SongListState, songListsReducer } from './reducer';
+import { SongListState, songListsReducer } from './reducer';
 
 expect.extend(expectImmutable);
 

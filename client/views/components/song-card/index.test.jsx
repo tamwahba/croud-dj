@@ -4,7 +4,7 @@ import expect from 'expect';
 import enzymify from 'expect-enzyme';
 import React from 'react';
 
-import { SongState } from '../../../core/song-lists';
+import { SongState } from '../../../core/song';
 
 import SongCard from './index';
 

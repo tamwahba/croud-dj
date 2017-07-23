@@ -5,7 +5,8 @@ import enzymify from 'expect-enzyme';
 import { List, Map } from 'immutable';
 import React from 'react';
 
-import { SongListState, SongState } from '../../../core/song-lists';
+import { SongState } from '../../../core/song';
+import { SongListState } from '../../../core/song-lists';
 
 
 import SongList from './index';

@@ -2,10 +2,10 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import { connect } from 'react-redux';
 
-import { currentSongPaused,
-  currentSongPlaying,
-  currentSongUpdate,
-  CurrentSongStatuses } from '../../../core/current-song';
+import { pauseCurrentSong,
+  playCurrentSong,
+  updateCurrentSong } from '../../../core/current-song';
+import { SongStatuses } from '../../../core/song';
 
 import Button from '../button';
 
@@ -15,20 +15,20 @@ export function Controls(props) {
   let statusButton;
 
   switch (props.status) {
-    case CurrentSongStatuses.BUFFERING:
+    case SongStatuses.BUFFERING:
       statusButton = <Button className="controls__button controls__button--status">Loading</Button>;
       break;
-    case CurrentSongStatuses.ERROR:
+    case SongStatuses.ERROR:
       statusButton = <Button className="controls__button controls__button--status">Error</Button>;
       break;
-    case CurrentSongStatuses.PAUSED:
+    case SongStatuses.PAUSED:
       statusButton = (
         <Button
           className="controls__button"
           onClick={props.onClickPlay}
         >Play</Button>);
       break;
-    case CurrentSongStatuses.PLAYING:
+    case SongStatuses.PLAYING:
       statusButton = (
         <Button
           className="controls__button"
@@ -67,9 +67,9 @@ function mapStateToProps(state) {
 
 function mapDispatchToProps(dispatch) {
   return {
-    onClickNext: () => dispatch(currentSongUpdate({ id: 'CAMWdvo71ls' })),
-    onClickPause: () => dispatch(currentSongPaused()),
-    onClickPlay: () => dispatch(currentSongPlaying()),
+    onClickNext: () => dispatch(updateCurrentSong({ id: 'CAMWdvo71ls' })),
+    onClickPause: () => dispatch(pauseCurrentSong()),
+    onClickPlay: () => dispatch(playCurrentSong()),
   };
 }
 

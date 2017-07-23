@@ -1,6 +1,9 @@
 /* eslint-env mocha */
 import expect from 'expect';
 
+import { mockDispatch } from '../../test-utils';
+import { SongStatuses } from '../../song';
+
 import { YOUTUBE_PLAYER_START,
   YOUTUBE_PLAYER_READY,
   YOUTUBE_PLAYER_ERROR,
@@ -8,12 +11,12 @@ import { YOUTUBE_PLAYER_START,
   loadYoutubePlayerSucceeded,
   loadYoutubePlayerFailed,
   loadYoutubePlayer } from './actions';
-import { mockDispatch } from '../../test-utils';
+
 
 describe('core', () => {
   describe('youtube', () => {
     describe('player', () => {
-      describe('action producers', () => {
+      describe('actions', () => {
         describe('loadYoutubePlayerStart', () => {
           it('should return correct action', () => {
             expect(loadYoutubePlayerStart()).toEqual({
@@ -42,38 +45,23 @@ describe('core', () => {
         });
 
         describe('loadYoutubePlayer', () => {
-          let player;
+          const actions = {
+            updateElapsed: expect.createSpy(),
+            updateSong: expect.createSpy(),
+            updateStatus: expect.createSpy(),
+          };
 
-          function MockPlayer(contaier, { events }) {
-            player = {
-              buffer: () => events.onStateChange({ data: 3 }),
-              end: () => events.onStateChange({ data: 0 }),
-              error: () => events.onError(),
-              getDuration: () => 10,
-              getCurrentTime: () => 1,
-              unknown: () => events.onStateChange({ data: -10 }),
-              unstart: () => events.onStateChange({ data: -1 }),
-              play: () => events.onStateChange({ data: 1 }),
-              pause: () => events.onStateChange({ data: 2 }),
-              queue: () => events.onStateChange({ data: 4 }),
-              ready: () => events.onReady(),
-            };
+          let events;
+          let load;
 
-            return player;
+          function mockInitializeYoutube(_, __, e) {
+            events = e;
+            return Promise.resolve();
           }
 
-          const api = {
-            Player: MockPlayer,
-          };
-          const state = {
-            currentSong: {
-              status: 'BUFFERING',
-            },
-          };
-          const getState = () => state;
-
-          afterEach(() => {
-            player = undefined;
+          beforeEach(() => {
+            load = loadYoutubePlayer(
+              undefined, undefined, undefined, actions, mockInitializeYoutube);
           });
 
           it('should dispatch correct actions on success', () => {
@@ -82,252 +70,121 @@ describe('core', () => {
               loadYoutubePlayerSucceeded(),
             ];
 
-            const load = loadYoutubePlayer(api, 'container', true)(mockDispatch(expectedActions), getState);
+            const promise = load(mockDispatch(expectedActions));
 
-            player.ready();
-
-            return load.then(() => expect(expectedActions.length).toEqual(0));
+            return promise.then(() => expect(expectedActions.length).toEqual(0));
           });
 
-          it('should dispatch correct actions on error', () => {
+          it('should dispatch correct actions on failure', () => {
             const expectedActions = [
               loadYoutubePlayerStart(),
-              { type: 'CURRENT_SONG_ERROR' },
               loadYoutubePlayerFailed(),
             ];
 
-            const load = loadYoutubePlayer(api, 'container', true)(mockDispatch(expectedActions), getState);
+            load = loadYoutubePlayer(
+              undefined, undefined, undefined, actions, () => Promise.reject());
 
-            player.error();
+            const promise = load(mockDispatch(expectedActions));
 
-            return load.then(() => expect(expectedActions.length).toEqual(0));
+            return promise.then(() => expect(expectedActions.length).toEqual(0));
           });
 
           it('should dispatch correct actions on buffering', () => {
             const expectedActions = [
               loadYoutubePlayerStart(),
               loadYoutubePlayerSucceeded(),
-              { type: 'CURRENT_SONG_BUFFERING' },
             ];
 
-            const load = loadYoutubePlayer(api, 'container', true)(mockDispatch(expectedActions), getState);
+            const promise = load(mockDispatch(expectedActions));
 
-            player.ready();
+            events.onBuffering();
 
-            return load
-              .then(() => player.buffer())
-              .then(() => expect(expectedActions.length).toEqual(0));
+            return promise.then(() => {
+              expect(expectedActions.length).toEqual(0);
+              expect(actions.updateStatus).toHaveBeenCalledWith(SongStatuses.BUFFERING);
+            });
           });
 
-          it('should dispatch correct actions on ended', () => {
-            const expectedActions = [
-              loadYoutubePlayerStart(),
-              loadYoutubePlayerSucceeded(),
-              { type: 'CURRENT_SONG_PAUSED' },
-            ];
-
-            const load = loadYoutubePlayer(api, 'container', true)(mockDispatch(expectedActions), getState);
-
-            player.ready();
-
-            return load
-              .then(() => player.end())
-              .then(() => expect(expectedActions.length).toEqual(0));
-          });
-
-          it('should dispatch no actions on unknown', () => {
+          it('should dispatch correct actions on duration update', () => {
+            const duration = 10;
             const expectedActions = [
               loadYoutubePlayerStart(),
               loadYoutubePlayerSucceeded(),
             ];
 
-            const load = loadYoutubePlayer(api, 'container', true)(mockDispatch(expectedActions), getState);
+            const promise = load(mockDispatch(expectedActions));
 
-            player.ready();
+            events.onDurationUpdated(duration);
 
-            return load
-              .then(() => player.unknown())
-              .then(() => expect(expectedActions.length).toEqual(0));
+            return promise.then(() => {
+              expect(expectedActions.length).toEqual(0);
+              expect(actions.updateSong).toHaveBeenCalledWith({ duration });
+            });
+          });
+
+          it('should dispatch correct actions on error', () => {
+            const expectedActions = [
+              loadYoutubePlayerStart(),
+              loadYoutubePlayerSucceeded(),
+            ];
+
+            const promise = load(mockDispatch(expectedActions));
+
+            events.onError();
+
+            return promise.then(() => {
+              expect(expectedActions.length).toEqual(0);
+              expect(actions.updateStatus).toHaveBeenCalledWith(SongStatuses.ERROR);
+            });
           });
 
           it('should dispatch correct actions on paused', () => {
             const expectedActions = [
               loadYoutubePlayerStart(),
               loadYoutubePlayerSucceeded(),
-              { type: 'CURRENT_SONG_PAUSED' },
             ];
 
-            const load = loadYoutubePlayer(api, 'container', true)(mockDispatch(expectedActions), getState);
+            const promise = load(mockDispatch(expectedActions));
 
-            player.ready();
+            events.onPaused();
 
-            return load
-              .then(() => player.pause())
-              .then(() => expect(expectedActions.length).toEqual(0));
+            return promise.then(() => {
+              expect(expectedActions.length).toEqual(0);
+              expect(actions.updateStatus).toHaveBeenCalledWith(SongStatuses.PAUSED);
+            });
           });
 
           it('should dispatch correct actions on playing', () => {
             const expectedActions = [
               loadYoutubePlayerStart(),
               loadYoutubePlayerSucceeded(),
-              { type: 'CURRENT_SONG_PLAYING' },
-              { type: 'CURRENT_SONG_UPDATE' },
-              { type: 'CURRENT_SONG_PAUSED' },
             ];
 
-            const load = loadYoutubePlayer(api, 'container', true)(mockDispatch(expectedActions), getState);
+            const promise = load(mockDispatch(expectedActions));
 
-            player.ready();
+            events.onPlaying();
 
-            return load
-              .then(() => {
-                player.play();
-                player.pause();
-              }).then(() => expect(expectedActions.length).toEqual(0));
+            return promise.then(() => {
+              expect(expectedActions.length).toEqual(0);
+              expect(actions.updateStatus).toHaveBeenCalledWith(SongStatuses.PLAYING);
+            });
           });
 
-          it('should dispatch correct actions on queued', () => {
+          it('should dispatch correct actions on time update', () => {
+            const elapsed = 10;
             const expectedActions = [
               loadYoutubePlayerStart(),
               loadYoutubePlayerSucceeded(),
             ];
 
-            const load = loadYoutubePlayer(api, 'container', true)(mockDispatch(expectedActions), getState);
+            const promise = load(mockDispatch(expectedActions));
 
-            player.ready();
+            events.onTimeUpdated(elapsed);
 
-            return load
-              .then(() => {
-                player.queue();
-              }).then(() => expect(expectedActions.length).toEqual(0));
-          });
-
-          it('should dispatch correct actions on unstarted', () => {
-            const expectedActions = [
-              loadYoutubePlayerStart(),
-              loadYoutubePlayerSucceeded(),
-            ];
-
-            const load = loadYoutubePlayer(api, 'container', true)(mockDispatch(expectedActions), getState);
-
-            player.ready();
-
-            return load
-              .then(() => player.unstart())
-              .then(() => expect(expectedActions.length).toEqual(0));
-          });
-
-          it('should dispatch correct actions on update time', () => {
-            const expectedActions = [
-              loadYoutubePlayerStart(),
-              loadYoutubePlayerSucceeded(),
-              { type: 'CURRENT_SONG_PLAYING' },
-              { type: 'CURRENT_SONG_UPDATE' },
-              { type: 'CURRENT_SONG_ELAPSED' },
-              { type: 'CURRENT_SONG_PAUSED' },
-            ];
-
-            const load = loadYoutubePlayer(api, 'container', true)(mockDispatch(expectedActions), getState);
-
-            player.ready();
-
-            return load
-              .then(() => {
-                player.play();
-                return new Promise((resolve) => {
-                  setTimeout(() => {
-                    player.pause();
-                    resolve();
-                  }, 550);
-                });
-              }).then(() => expect(expectedActions.length).toEqual(0));
-          });
-
-          it('should dispatch playing action once', () => {
-            const expectedActions = [
-              loadYoutubePlayerStart(),
-              loadYoutubePlayerSucceeded(),
-              { type: 'CURRENT_SONG_PLAYING' },
-              { type: 'CURRENT_SONG_UPDATE' },
-              { type: 'CURRENT_SONG_UPDATE' },
-              { type: 'CURRENT_SONG_PAUSED' },
-            ];
-
-            const load = loadYoutubePlayer(api, 'container', true)(mockDispatch(expectedActions), getState);
-
-            player.ready();
-
-            return load
-              .then(() => {
-                player.play();
-                state.currentSong.status = 'PLAYING';
-                player.play();
-                player.pause();
-              }).then(() => expect(expectedActions.length).toEqual(0));
-          });
-
-          it('should dispatch paused action once', () => {
-            const expectedActions = [
-              loadYoutubePlayerStart(),
-              loadYoutubePlayerSucceeded(),
-              { type: 'CURRENT_SONG_PAUSED' },
-            ];
-
-            const load = loadYoutubePlayer(api, 'container', true)(mockDispatch(expectedActions), getState);
-
-            player.ready();
-
-            return load
-              .then(() => {
-                player.pause();
-                state.currentSong.status = 'PAUSED';
-                player.pause();
-              }).then(() => expect(expectedActions.length).toEqual(0));
-          });
-
-          it('should recreate player when container is different', () => {
-            const expectedActions = [
-              loadYoutubePlayerStart(),
-              loadYoutubePlayerSucceeded(),
-              loadYoutubePlayerStart(),
-              loadYoutubePlayerSucceeded(),
-            ];
-
-            const load = loadYoutubePlayer(api, 'container', true)(mockDispatch(expectedActions), getState);
-
-            player.ready();
-
-            player = Object.assign({}, player);
-
-            return load
-              .then(() => {
-                const secondLoad = loadYoutubePlayer(api, 'different-container')(mockDispatch(expectedActions), getState);
-                player.ready();
-                return secondLoad;
-              })
-              .then(p => expect(p).toBe(player))
-              .then(() => expect(expectedActions.length).toEqual(0));
-          });
-
-          it('should not recreate player when shouldReset is false', () => {
-            const expectedActions = [
-              loadYoutubePlayerStart(),
-              loadYoutubePlayerSucceeded(),
-              loadYoutubePlayerStart(),
-              loadYoutubePlayerSucceeded(),
-            ];
-
-            const load = loadYoutubePlayer(api, 'container', true)(mockDispatch(expectedActions), getState);
-
-            player.ready();
-
-            const originalPlayer = player;
-            player = Object.assign({}, player);
-
-            return load
-              .then(() => loadYoutubePlayer(api, 'container')(mockDispatch(expectedActions), getState))
-              .then(p => expect(p).toBe(originalPlayer))
-              .then(() => expect(expectedActions.length).toEqual(0));
+            return promise.then(() => {
+              expect(expectedActions.length).toEqual(0);
+              expect(actions.updateElapsed).toHaveBeenCalledWith(elapsed);
+            });
           });
         });
       });

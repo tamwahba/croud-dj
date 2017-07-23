@@ -1,3 +1,4 @@
+import { watchCurrentSong } from '../current-song';
 import { checkRoomExists } from '../firebase';
 import { watchSongList } from '../song-lists';
 
@@ -25,6 +26,7 @@ export function changeRoom(name, check = checkRoomExists) {
     return check(name)
       .then((ref) => {
         dispatch(roomChanged(ref.key, true));
+        dispatch(watchCurrentSong(ref.child('nowPlaying')));
         dispatch(watchSongList(ref.child('queue').orderByChild('votes'), `${ref.key}-queue`));
         dispatch(watchSongList(ref.child('played'), `${ref.key}-played`));
       })

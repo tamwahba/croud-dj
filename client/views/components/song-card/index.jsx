@@ -1,6 +1,5 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import { SongState } from '../../../core/song-lists';
 
 import './styles.less';
 
@@ -28,7 +27,11 @@ SongCard.defaultProps = {
 
 SongCard.propTypes = {
   accessory: PropTypes.element,
-  song: PropTypes.instanceOf(SongState).isRequired,
+  song: PropTypes.shape({
+    artist: PropTypes.string,
+    artwork: PropTypes.string.isRequired,
+    title: PropTypes.string.isRequired,
+  }).isRequired,
 };
 
 export default SongCard;

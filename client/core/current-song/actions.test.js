@@ -1,73 +1,139 @@
 /* eslint-env mocha */
 import expect from 'expect';
 
-import { CURRENT_SONG_BUFFERING,
-  CURRENT_SONG_ELAPSED,
-  CURRENT_SONG_ERROR,
-  CURRENT_SONG_PAUSED,
-  CURRENT_SONG_PLAYING,
-  CURRENT_SONG_UPDATE,
-  currentSongBuffering,
-  currentSongElapsed,
-  currentSongError,
-  currentSongPaused,
-  currentSongPlaying,
-  currentSongUpdate } from './actions';
+import { SongStatuses } from '../song';
+import { mockDispatch } from '../test-utils';
+
+import { CURRENT_SONG_UPDATE,
+  currentSongUpdate,
+  changeCurrentSong,
+  pauseCurrentSong,
+  playCurrentSong,
+  updateCurrentSong,
+  updateCurrentSongElapsed,
+  updateCurrentSongStatus,
+  watchCurrentSong } from './actions';
 
 describe('core', () => {
   describe('current song', () => {
-    describe('action producers', () => {
-      describe('currentSongBuffering', () => {
-        it('should return correct action', () => {
-          expect(currentSongBuffering()).toEqual({
-            type: CURRENT_SONG_BUFFERING,
-          });
-        });
-      });
+    describe('actions', () => {
+      let roomName;
 
-      describe('currentSongElapsed', () => {
-        it('should return correct action', () => {
-          const time = 12;
+      const mockRef = {
+        on: expect.createSpy(),
+        set: expect.createSpy(),
+      };
 
-          expect(currentSongElapsed(time)).toEqual({
-            type: CURRENT_SONG_ELAPSED,
-            elapsed: time,
-          });
-        });
-      });
+      const mockDatabase = {
+        ref: expect.createSpy().andReturn(mockRef),
+      };
 
-      describe('currentSongError', () => {
-        it('should return correct action', () => {
-          expect(currentSongError()).toEqual({
-            type: CURRENT_SONG_ERROR,
-          });
-        });
-      });
+      function mockGetState() {
+        return {
+          currentSong: {
+            merge: () => ({
+              toJS: () => ({}),
+            }),
+            status: SongStatuses.EMPTY,
+          },
+          room: {
+            name: roomName,
+          },
+        };
+      }
 
-      describe('currentSongPaused', () => {
-        it('should return correct action', () => {
-          expect(currentSongPaused()).toEqual({
-            type: CURRENT_SONG_PAUSED,
-          });
-        });
-      });
+      beforeEach(() => {
+        roomName = 'name';
 
-      describe('currentSongPlaying', () => {
-        it('should return correct action', () => {
-          expect(currentSongPlaying()).toEqual({
-            type: CURRENT_SONG_PLAYING,
-          });
-        });
+        mockDatabase.ref.reset();
+        mockRef.on.reset();
+        mockRef.set.reset();
       });
 
       describe('currentSongUpdate', () => {
         it('should return correct action', () => {
-          const song = { song: 's' };
-
+          const song = { title: 't' };
           expect(currentSongUpdate(song)).toEqual({
             type: CURRENT_SONG_UPDATE,
             song,
           });
+        });
+      });
+
+      describe('watchCurrentSong', () => {
+        it('should dispatch correct action on value', () => {
+          const expectedActions = [
+            currentSongUpdate(),
+          ];
+
+          watchCurrentSong(mockRef)(mockDispatch(expectedActions));
+
+          expect(mockRef.on).toHaveBeenCalled();
+
+          mockRef.on.calls[0].arguments[1]({ val: () => '' });
+
+          expect(expectedActions.length).toEqual(0);
+        });
+      });
+
+      describe('changeCurrentSong', () => {
+        it('should update firebase ref', () => {
+          const song = { title: 't' };
+          changeCurrentSong(song, mockDatabase)(undefined, mockGetState);
+
+          expect(mockDatabase.ref).toHaveBeenCalled();
+          expect(mockRef.set).toHaveBeenCalledWith(song);
+        });
+      });
+
+      describe('updateCurrentSong', () => {
+        it('should update firebase ref', () => {
+          updateCurrentSong({}, mockDatabase)(undefined, mockGetState);
+
+          expect(mockDatabase.ref).toHaveBeenCalled();
+          expect(mockRef.set).toHaveBeenCalled();
+        });
+      });
+
+      describe('updateCurrentSongElapsed', () => {
+        it('should update firebase ref', () => {
+          const elapsed = 10;
+          updateCurrentSongElapsed(elapsed, mockDatabase)(undefined, mockGetState);
+
+          expect(mockDatabase.ref).toHaveBeenCalled();
+          expect(mockRef.set).toHaveBeenCalledWith(elapsed);
+        });
+      });
+
+      describe('updateCurrentSongStatus', () => {
+        it('should update firebase ref', () => {
+          const status = SongStatuses.PLAYING;
+          updateCurrentSongStatus(status, mockDatabase)(undefined, mockGetState);
+
+          expect(mockDatabase.ref).toHaveBeenCalled();
+          expect(mockRef.set).toHaveBeenCalledWith(status);
+        });
+
+        it('should not update when status matches state', () => {
+          const status = SongStatuses.EMPTY;
+          updateCurrentSongStatus(status, mockDatabase)(undefined, mockGetState);
+
+          expect(mockDatabase.ref).toNotHaveBeenCalled();
+          expect(mockRef.set).toNotHaveBeenCalled();
+        });
+      });
+
+      describe('pauseCurrentSong', () => {
+        it('should act as an alias for updateCurrentSongStatus', () => {
+          expect(pauseCurrentSong(mockDatabase)).toEqual(
+            updateCurrentSongStatus(SongStatuses.PAUSED, mockDatabase));
+        });
+      });
+
+      describe('playCurrentSong', () => {
+        it('should act as an alias for updateCurrentSongStatus', () => {
+          expect(playCurrentSong(mockDatabase)).toEqual(
+            updateCurrentSongStatus(SongStatuses.PLAYING, mockDatabase));
         });
       });
     });
