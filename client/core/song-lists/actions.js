@@ -1,4 +1,5 @@
 import { app } from '../firebase';
+import { SongState } from '../song';
 
 export const SONG_LISTS_LIST_LOADED = 'SONG_LISTS_LIST_LOADED';
 export const SONG_LISTS_SONG_ADDED = 'SONG_LISTS_SONG_ADDED';
@@ -6,11 +7,11 @@ export const SONG_LISTS_SONG_CHANGED = 'SONG_LISTS_SONG_CHANGED';
 export const SONG_LISTS_SONG_MOVED = 'SONG_LISTS_SONG_MOVED';
 export const SONG_LISTS_SONG_REMOVED = 'SONG_LISTS_REMOVED';
 
-export function songListsLoad(listKey, order, list) {
+export function songListsLoad(listKey, order, map) {
   return {
     type: SONG_LISTS_LIST_LOADED,
-    list,
     listKey,
+    map,
     order,
   };
 }
@@ -57,8 +58,12 @@ export function watchSongList(firebaseRef, listKey) {
   return (dispatch, getState) => (
     firebaseRef.once('value', (ds) => {
       const order = [];
-      ds.forEach((child) => { order.push(child.key); });
-      dispatch(songListsLoad(listKey, order, ds.val()));
+      const map = {};
+      ds.forEach((child) => {
+        map[child.key] = new SongState(child.val());
+        order.push(child.key);
+      });
+      dispatch(songListsLoad(listKey, order, map));
     }).then(() => {
       firebaseRef.on('child_added', (ds, previousKey) => {
         const list = getState().songLists.get(listKey);
@@ -91,6 +96,12 @@ export function addSong(roomName, listKey, s) {
 export function downVoteSong(roomName, listKey, songKey) {
   return () => {
     app.database().ref(`rooms/${roomName}/${listKey}/${songKey}/votes`).transaction(val => val + 1);
+  };
+}
+
+export function removeSong(roomName, listKey, songKey) {
+  return () => {
+    app.database().ref(`rooms/${roomName}/${listKey}/${songKey}`).remove();
   };
 }
 

@@ -38,7 +38,7 @@ export class YoutubePlayer extends React.Component {
     const { songID, status } = this.props;
 
     this.state.loadYoutube.then((player) => {
-      if (songID !== nextProps.songID) {
+      if (songID !== nextProps.songID && nextProps.status !== SongStatuses.EMPTY) {
         player.loadVideoById(nextProps.songID, nextProps.songPosition);
       } else if (status !== nextProps.status) {
         switch (nextProps.status) {

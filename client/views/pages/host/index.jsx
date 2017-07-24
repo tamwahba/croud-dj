@@ -3,6 +3,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 
 import { changeRoom } from '../../../core/room';
+import { SongStatuses } from '../../../core/song';
 import { addSong, downVoteSong, upVoteSong, SongListState } from '../../../core/song-lists';
 
 import NowPlaying from '../../components/now-playing';
@@ -37,7 +38,7 @@ export class UnconnectedHostPage extends React.Component {
 
   handleReplay(id) {
     const song = this.props.played.songs.get(id);
-    this.props.dispatch(addSong(this.props.room.name, 'queue', song));
+    this.props.dispatch(addSong(this.props.room.name, 'queue', song.merge({ elapsed: 0, status: SongStatuses.UNSTARTED }).toJS()));
   }
 
   handleUpVote(id) {

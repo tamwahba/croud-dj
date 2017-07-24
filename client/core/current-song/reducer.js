@@ -5,7 +5,7 @@ export function currentSongReducer(s = new SongState(), action) {
   let state = s;
   switch (action.type) {
     case CURRENT_SONG_UPDATE:
-      state = state.merge(action.song);
+      state = new SongState(action.song);
       break;
     default:
       break;

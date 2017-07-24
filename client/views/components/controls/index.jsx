@@ -4,14 +4,16 @@ import { connect } from 'react-redux';
 
 import { pauseCurrentSong,
   playCurrentSong,
-  updateCurrentSong } from '../../../core/current-song';
+  changeCurrentSong } from '../../../core/current-song';
 import { SongStatuses } from '../../../core/song';
+import { addSong, removeSong, SongListState } from '../../../core/song-lists';
 
 import Button from '../button';
 
 import './styles.less';
 
-export function Controls(props) {
+export function UnconnectedControls(props) {
+  const { className, nextKey, onClickNext } = props;
   let statusButton;
 
   switch (props.status) {
@@ -40,19 +42,21 @@ export function Controls(props) {
   }
 
   return (
-    <div className={`controls ${props.className}`}>
+    <div className={`controls ${className}`}>
       {statusButton}
-      <Button className="controls__button" onClick={props.onClickNext}>Next</Button>
+      {nextKey && <Button className="controls__button" onClick={onClickNext}>Next</Button>}
     </div>
   );
 }
 
-Controls.defaultProps = {
+UnconnectedControls.defaultProps = {
   className: '',
+  nextKey: '',
 };
 
-Controls.propTypes = {
+UnconnectedControls.propTypes = {
   className: PropTypes.string,
+  nextKey: PropTypes.string,
   onClickNext: PropTypes.func.isRequired,
   onClickPause: PropTypes.func.isRequired,
   onClickPlay: PropTypes.func.isRequired,
@@ -61,16 +65,39 @@ Controls.propTypes = {
 
 function mapStateToProps(state) {
   return {
-    status: state.currentSong.status,
+    room: state.room,
+    song: state.currentSong,
+    queue: state.songLists.get(`${state.room.name}-queue`),
   };
 }
 
 function mapDispatchToProps(dispatch) {
   return {
-    onClickNext: () => dispatch(updateCurrentSong({ id: 'CAMWdvo71ls' })),
+    addSong: (room, listKey, song) => dispatch(addSong(room, listKey, song)),
     onClickPause: () => dispatch(pauseCurrentSong()),
     onClickPlay: () => dispatch(playCurrentSong()),
+    play: song => dispatch(changeCurrentSong(song.toJS())),
+    removeSong: (room, listKey, songKey) => dispatch(removeSong(room, listKey, songKey)),
   };
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Controls);
+export function mergeProps(stateProps, dispatchProps) {
+  const { room, song, queue = new SongListState() } = stateProps;
+  const nextKey = queue.order.first();
+  return {
+    nextKey,
+    onClickNext: () => {
+      const empty = song.status === SongStatuses.EMPTY;
+      if (!empty) {
+        dispatchProps.addSong(room.name, 'played', song.merge({ elapsed: 0, status: SongStatuses.EMPTY }).toJS());
+      }
+      dispatchProps.play(queue.songs.get(nextKey));
+      dispatchProps.removeSong(room.name, 'queue', nextKey);
+    },
+    onClickPause: dispatchProps.onClickPause,
+    onClickPlay: dispatchProps.onClickPlay,
+    status: song.status,
+  };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps, mergeProps)(UnconnectedControls);

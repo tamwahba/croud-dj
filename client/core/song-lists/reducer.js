@@ -20,7 +20,7 @@ export function songListsReducer(s = new Map(), action) {
     case SONG_LISTS_LIST_LOADED:
       state = state.set(action.listKey, new SongListState({
         order: new List(action.order),
-        songs: new Map(action.list),
+        songs: new Map(action.map),
       }));
       break;
     case SONG_LISTS_SONG_ADDED:

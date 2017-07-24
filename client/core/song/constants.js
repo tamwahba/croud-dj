@@ -1,6 +1,7 @@
 import { Record } from 'immutable';
 
 export const SongServices = Object.freeze({
+  EMPTY: 'EMPTY',
   YOUTUBE: 'YOUTUBE',
 });
 
@@ -10,6 +11,7 @@ export const SongStatuses = Object.freeze({
   ERROR: 'ERROR',
   PAUSED: 'PAUSED',
   PLAYING: 'PLAYING',
+  UNSTARTED: 'UNSTARTED',
 });
 
 export const SongState = new Record({
@@ -20,7 +22,7 @@ export const SongState = new Record({
   elapsed: 0,
   id: '',
   title: '',
-  service: SongServices.YOUTUBE,
+  service: SongServices.EMPTY,
   skips: 0,
   status: SongStatuses.EMPTY,
   votes: 0,
