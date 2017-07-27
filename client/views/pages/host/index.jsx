@@ -76,6 +76,11 @@ export class UnconnectedHostPage extends React.Component {
   }
 }
 
+UnconnectedHostPage.defaultProps = {
+  played: new SongListState(),
+  queue: new SongListState(),
+};
+
 UnconnectedHostPage.propTypes = {
   dispatch: PropTypes.func.isRequired,
   match: PropTypes.shape({
@@ -83,8 +88,8 @@ UnconnectedHostPage.propTypes = {
       room: PropTypes.string.isRequired,
     }).isRequired,
   }).isRequired,
-  played: PropTypes.instanceOf(SongListState).isRequired,
-  queue: PropTypes.instanceOf(SongListState).isRequired,
+  played: PropTypes.instanceOf(SongListState),
+  queue: PropTypes.instanceOf(SongListState),
   room: PropTypes.shape({
     isLoading: PropTypes.bool.isRequired,
     isValid: PropTypes.bool.isRequired,
