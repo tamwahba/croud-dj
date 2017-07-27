@@ -1,10 +1,8 @@
-import { currentSongBuffering,
-  currentSongElapsed,
-  currentSongError,
-  currentSongPaused,
-  currentSongPlaying,
-  currentSongUpdate,
-  CurrentSongStatuses } from '../../current-song';
+import { updateCurrentSong,
+  updateCurrentSongElapsed,
+  updateCurrentSongStatus } from '../../current-song';
+import { SongStatuses } from '../../song';
+
 import { initializeYoutubePlayer } from './player-service';
 
 export const YOUTUBE_PLAYER_START = 'YOUTUBE_PLAYER_START';
@@ -30,25 +28,21 @@ export function loadYoutubePlayerFailed() {
   };
 }
 
-export function loadYoutubePlayer(api, containerID, shouldReset = false) {
-  return (dispatch, getState) => {
+export function loadYoutubePlayer(api, container, shouldReset = false, actions = {
+  updateElapsed: updateCurrentSongElapsed,
+  updateSong: updateCurrentSong,
+  updateStatus: updateCurrentSongStatus,
+}, initializePlayer = initializeYoutubePlayer) {
+  return (dispatch) => {
     dispatch(loadYoutubePlayerStart());
 
-    return initializeYoutubePlayer(api, containerID, {
-      onBuffering: () => dispatch(currentSongBuffering()),
-      onDurationUpdated: duration => dispatch(currentSongUpdate({ duration })),
-      onError: () => dispatch(currentSongError()),
-      onPaused: () => {
-        if (getState().currentSong.status !== CurrentSongStatuses.PAUSED) {
-          dispatch(currentSongPaused());
-        }
-      },
-      onPlaying: () => {
-        if (getState().currentSong.status !== CurrentSongStatuses.PLAYING) {
-          dispatch(currentSongPlaying());
-        }
-      },
-      onTimeUpdated: time => dispatch(currentSongElapsed(time)),
+    return initializePlayer(api, container, {
+      onBuffering: () => dispatch(actions.updateStatus(SongStatuses.BUFFERING)),
+      onDurationUpdated: duration => dispatch(actions.updateSong({ duration })),
+      onError: () => dispatch(actions.updateStatus(SongStatuses.ERROR)),
+      onPaused: () => dispatch(actions.updateStatus(SongStatuses.PAUSED)),
+      onPlaying: () => dispatch(actions.updateStatus(SongStatuses.PLAYING)),
+      onTimeUpdated: time => dispatch(actions.updateElapsed(time)),
     }, shouldReset).then((player) => {
       dispatch(loadYoutubePlayerSucceeded(player));
       return player;

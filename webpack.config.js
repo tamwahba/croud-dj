@@ -1,5 +1,6 @@
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const SpriteLoaderPlugin = require('svg-sprite-loader/plugin');
 const path = require('path');
 const webpack = require('webpack');
 const WebpackMd5Hash = require('webpack-md5-hash');
@@ -27,6 +28,7 @@ const loaders = {
     test: /\.(less|css)$/,
     loaders: ['style-loader', 'css-loader', 'postcss-loader', 'less-loader'],
   },
+  svg: { test: /\.svg$/, loader: 'svg-sprite-loader', options: { extract: true, spriteFileName: 'icons.svg' } },
 };
 
 const config = {
@@ -35,6 +37,7 @@ const config = {
     modules: [path.resolve('.'), 'node_modules'],
   },
   plugins: [
+    new SpriteLoaderPlugin(),
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify(NODE_ENV),
     }),
@@ -50,12 +53,18 @@ if (IS_DEVELOPMENT || IS_PRODUCTION) {
     path: path.resolve('./site'),
     publicPath: '/',
   };
-  config.plugins.push(new HtmlWebpackPlugin({
-    filename: 'index.html',
-    hash: false,
-    inject: 'body',
-    template: './client/index.html',
-  }));
+  config.plugins.push(
+    new webpack.DefinePlugin({
+      'process.env.FIREBASE_API_KEY': JSON.stringify(process.env.FIREBASE_API_KEY),
+      'process.env.FIREBASE_AUTH_DOMAIN': JSON.stringify(process.env.FIREBASE_AUTH_DOMAIN),
+      'process.env.FIREBASE_DB_URL': JSON.stringify(process.env.FIREBASE_DB_URL),
+    }),
+    new HtmlWebpackPlugin({
+      filename: 'index.html',
+      hash: false,
+      inject: 'body',
+      template: './client/index.html',
+    }));
 }
 
 if (IS_DEVELOPMENT) {
@@ -70,6 +79,7 @@ if (IS_DEVELOPMENT) {
       loaders.font,
       loaders.js,
       loaders.less,
+      loaders.svg,
     ],
   };
   config.plugins.push(
@@ -103,6 +113,7 @@ if (IS_PRODUCTION) {
     rules: [
       loaders.font,
       loaders.js,
+      loaders.svg,
       {
         test: /\.(less|css)$/,
         loader: ExtractTextPlugin.extract({
@@ -161,6 +172,7 @@ if (IS_TEST) {
       loaders.js,
       loaders.json,
       loaders.less,
+      loaders.svg,
       {
         test: /\.jsx?$/,
         loader: 'istanbul-instrumenter-loader',

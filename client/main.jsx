@@ -5,6 +5,8 @@ import { AppContainer } from 'react-hot-loader';
 import configureStore from './core/store';
 import Root from './views/root';
 
+import { watchFirebase } from './core/firebase';
+
 import 'normalize.css';
 import './views/styles/base.less';
 
@@ -18,6 +20,8 @@ function render() {
     </AppContainer>,
     rootElement);
 }
+
+store.dispatch(watchFirebase());
 
 if (module.hot) {
   module.hot.accept('./views/root', () => {

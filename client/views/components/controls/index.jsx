@@ -2,55 +2,61 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import { connect } from 'react-redux';
 
-import { currentSongPaused,
-  currentSongPlaying,
-  currentSongUpdate,
-  CurrentSongStatuses } from '../../../core/current-song';
+import { pauseCurrentSong,
+  playCurrentSong,
+  changeCurrentSong } from '../../../core/current-song';
+import { SongStatuses } from '../../../core/song';
+import { addSong, removeSong, SongListState } from '../../../core/song-lists';
+
+import Button from '../button';
 
 import './styles.less';
 
-export function Controls(props) {
+export function UnconnectedControls(props) {
+  const { className, nextKey, onClickNext } = props;
   let statusButton;
 
   switch (props.status) {
-    case CurrentSongStatuses.BUFFERING:
-      statusButton = <button className="controls__button controls__button--status">Loading</button>;
+    case SongStatuses.BUFFERING:
+      statusButton = <Button className="controls__button controls__button--status">Loading</Button>;
       break;
-    case CurrentSongStatuses.ERROR:
-      statusButton = <button className="controls__button controls__button--status">Error</button>;
+    case SongStatuses.ERROR:
+      statusButton = <Button className="controls__button controls__button--status">Error</Button>;
       break;
-    case CurrentSongStatuses.PAUSED:
+    case SongStatuses.PAUSED:
       statusButton = (
-        <button
+        <Button
           className="controls__button"
           onClick={props.onClickPlay}
-        >Play</button>);
+        >Play</Button>);
       break;
-    case CurrentSongStatuses.PLAYING:
+    case SongStatuses.PLAYING:
       statusButton = (
-        <button
+        <Button
           className="controls__button"
           onClick={props.onClickPause}
-        >Pause</button>);
+        >Pause</Button>);
       break;
     default:
       break;
   }
 
   return (
-    <div className={`controls ${props.className}`}>
+    <div className={`controls ${className}`}>
       {statusButton}
-      <button className="controls__button" onClick={props.onClickNext}>Next</button>
+      {nextKey && <Button className="controls__button" onClick={onClickNext}>Next</Button>}
     </div>
   );
 }
 
-Controls.defaultProps = {
+UnconnectedControls.defaultProps = {
   className: '',
+  nextKey: '',
 };
 
-Controls.propTypes = {
+UnconnectedControls.propTypes = {
   className: PropTypes.string,
+  nextKey: PropTypes.string,
   onClickNext: PropTypes.func.isRequired,
   onClickPause: PropTypes.func.isRequired,
   onClickPlay: PropTypes.func.isRequired,
@@ -59,16 +65,39 @@ Controls.propTypes = {
 
 function mapStateToProps(state) {
   return {
-    status: state.currentSong.status,
+    room: state.room,
+    song: state.currentSong,
+    queue: state.songLists.get(`${state.room.name}-queue`),
   };
 }
 
 function mapDispatchToProps(dispatch) {
   return {
-    onClickNext: () => dispatch(currentSongUpdate({ id: 'CAMWdvo71ls' })),
-    onClickPause: () => dispatch(currentSongPaused()),
-    onClickPlay: () => dispatch(currentSongPlaying()),
+    addSong: (room, listKey, song) => dispatch(addSong(room, listKey, song)),
+    onClickPause: () => dispatch(pauseCurrentSong()),
+    onClickPlay: () => dispatch(playCurrentSong()),
+    play: song => dispatch(changeCurrentSong(song.toJS())),
+    removeSong: (room, listKey, songKey) => dispatch(removeSong(room, listKey, songKey)),
   };
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Controls);
+export function mergeProps(stateProps, dispatchProps) {
+  const { room, song, queue = new SongListState() } = stateProps;
+  const nextKey = queue.order.first();
+  return {
+    nextKey,
+    onClickNext: () => {
+      const empty = song.status === SongStatuses.EMPTY;
+      if (!empty) {
+        dispatchProps.addSong(room.name, 'played', song.merge({ elapsed: 0, status: SongStatuses.EMPTY }).toJS());
+      }
+      dispatchProps.play(queue.songs.get(nextKey));
+      dispatchProps.removeSong(room.name, 'queue', nextKey);
+    },
+    onClickPause: dispatchProps.onClickPause,
+    onClickPlay: dispatchProps.onClickPlay,
+    status: song.status,
+  };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps, mergeProps)(UnconnectedControls);

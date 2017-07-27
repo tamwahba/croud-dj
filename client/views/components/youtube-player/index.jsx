@@ -2,43 +2,63 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import { connect } from 'react-redux';
 
-import { CurrentSongStatuses } from '../../../core/current-song';
+import { SongStatuses } from '../../../core/song';
 import { loadYoutubeAPI } from '../../../core/youtube/api';
 import { loadYoutubePlayer } from '../../../core/youtube/player';
 
 import './styles.less';
 
 export class YoutubePlayer extends React.Component {
+  constructor() {
+    super();
+
+    this.state = {};
+  }
+
   componentDidMount() {
-    const { dispatch } = this.props;
-    dispatch(loadYoutubeAPI())
-      .then(api => dispatch(loadYoutubePlayer(api, 'youtube-player')));
+    const { dispatch, songID, songPosition } = this.props;
+
+    let loadYoutube = this.state.loadYoutube;
+
+    if (!loadYoutube) {
+      loadYoutube = dispatch(loadYoutubeAPI())
+        .then(api => dispatch(loadYoutubePlayer(api, this.iframe)));
+
+      this.setState({ loadYoutube });
+    }
+
+    loadYoutube.then((player) => {
+      if (songID) {
+        player.loadVideoById(songID, songPosition);
+      }
+    });
   }
 
   componentWillReceiveProps(nextProps) {
-    const { player } = this.props;
+    const { songID, status } = this.props;
 
-    if (this.props.status !== nextProps.status) {
-      switch (nextProps.status) {
-        case CurrentSongStatuses.PAUSED:
-          player.pauseVideo();
-          break;
-        case CurrentSongStatuses.PLAYING:
-          player.playVideo();
-          break;
-        default:
-          break;
+    this.state.loadYoutube.then((player) => {
+      if (songID !== nextProps.songID && nextProps.status !== SongStatuses.EMPTY) {
+        player.loadVideoById(nextProps.songID, nextProps.songPosition);
+      } else if (status !== nextProps.status) {
+        switch (nextProps.status) {
+          case SongStatuses.PAUSED:
+            player.pauseVideo();
+            break;
+          case SongStatuses.PLAYING:
+            player.playVideo();
+            break;
+          default:
+            break;
+        }
       }
-    }
-
-    if (player && this.props.songID !== nextProps.songID) {
-      player.loadVideoById(nextProps.songID);
-    }
+    });
   }
 
   render() {
     return (
       <iframe
+        ref={(iframe) => { this.iframe = iframe; }}
         id="youtube-player"
         title="Youtube Player"
         className="youtube-player"
@@ -50,19 +70,15 @@ export class YoutubePlayer extends React.Component {
 
 YoutubePlayer.propTypes = {
   dispatch: PropTypes.func.isRequired,
-  player: PropTypes.shape({
-    loadVideoById: PropTypes.func.isRequired,
-    pauseVideo: PropTypes.func.isRequired,
-    playVideo: PropTypes.func.isRequired,
-  }),
   songID: PropTypes.string.isRequired,
+  songPosition: PropTypes.number.isRequired,
   status: PropTypes.string.isRequired,
 };
 
 function mapStateToProps(state) {
   return {
-    player: state.youtube.player.player,
     songID: state.currentSong.id,
+    songPosition: state.currentSong.elapsed,
     status: state.currentSong.status,
   };
 }

@@ -14,7 +14,7 @@ function Root({ store }) {
         <App>
           <div>
             <Route exact path="/" component={HomePage} />
-            <Route exact path="/host" component={HostPage} />
+            <Route exact path="/host/:room" component={HostPage} />
           </div>
         </App>
       </BrowserRouter>

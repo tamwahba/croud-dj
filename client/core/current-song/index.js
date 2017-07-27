@@ -1,8 +1,10 @@
-export { currentSongBuffering,
-  currentSongElapsed,
-  currentSongError,
-  currentSongPaused,
-  currentSongPlaying,
-  currentSongUpdate } from './actions';
-export { CurrentSongStatuses, CurrentSongTypes } from './enums';
+export { currentSongUpdate,
+  changeCurrentSong,
+  pauseCurrentSong,
+  playCurrentSong,
+  updateCurrentSong,
+  updateCurrentSongElapsed,
+  updateCurrentSongStatus,
+  watchCurrentSong } from './actions';
 export { currentSongReducer } from './reducer';
+
