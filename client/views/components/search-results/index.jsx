@@ -14,7 +14,7 @@ export function UnconnectedSearchResults(props) {
   const { addToQueue, clearResults, isLoading, results } = props;
   const accessory = songKey => (
     <Button
-      onClick={(event) => { event.preventDefault(); addToQueue(results[songKey]); clearResults(); }}
+      onClick={(event) => { event.preventDefault(); addToQueue(results.get(songKey)); clearResults(); }}
     >Play</Button>);
   const songs = new SongListState({
     order: results.keySeq().toList(),
