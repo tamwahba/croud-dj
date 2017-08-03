@@ -8,7 +8,8 @@ import { addSong, downVoteSong, upVoteSong, SongListState } from '../../../core/
 
 import NowPlaying from '../../components/now-playing';
 import SongList from '../../components/song-list';
-import SongSelector from '../../components/song-selector';
+import SearchResults from '../../components/search-results';
+import SearchInput from '../../components/search-input';
 import PlayerContainer from '../../components/player-container';
 
 import './styles.less';
@@ -54,7 +55,8 @@ export class UnconnectedHostPage extends React.Component {
     return (
       <div className="host">
         <NowPlaying showControls />
-        <SongSelector />
+        <SearchInput />
+        <SearchResults />
         <PlayerContainer />
         <h4>queue</h4>
         <SongList

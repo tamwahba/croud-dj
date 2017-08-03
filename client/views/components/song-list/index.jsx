@@ -38,7 +38,7 @@ function SongList(props) {
       </Button>
     );
   } else {
-    accessory = () => null;
+    accessory = props.accessory;
   }
 
   return (
@@ -56,6 +56,7 @@ function SongList(props) {
 }
 
 SongList.defaultProps = {
+  accessory: () => null,
   className: '',
   onSongDownVote: () => null,
   onSongReplay: () => null,
@@ -66,6 +67,7 @@ SongList.defaultProps = {
 };
 
 SongList.propTypes = {
+  accessory: PropTypes.func,
   className: PropTypes.string,
   onSongDownVote: PropTypes.func,
   onSongReplay: PropTypes.func,

@@ -1,0 +1,56 @@
+@import '../../styles/constants.less';
+
+.text-input {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  margin: 5px;
+  padding-top: 1em;
+  position: relative;
+
+  &__field {
+    border: solid 1px lighten(@secondary-color, 15%);
+    font-family: inherit;
+    font-size: 1.25em;
+    max-width: 100%;
+    outline: none;
+    padding: 0.25em;
+
+    &:focus {
+      border-color: @secondary-color;
+    }
+
+    &--error,
+    &--error:focus {
+      border-color: @error-color;
+    }
+  }
+
+  &__label {
+    color: @secondary-color;
+    display: block;
+    left: 0.25em;
+    position: absolute;
+    text-align: left;
+    top: 1.5em;
+    transform-origin: 0 0;
+    transition: transform 0.2s, color 1s;
+    transition-timing-function: ease-out;
+  }
+
+  &__tip {
+    background-color: @base-color;
+    color: @error-color;
+    display: block;
+    font-size: 0.75em;
+    position: absolute;
+    right: 0;
+    text-align: right;
+    top: 0;
+  }
+}
+
+.text-input__field:focus + .text-input__label,
+.text-input--filled .text-input__label {
+  transform: translate(-0.25em, -1.5em) scale(0.75, 0.75);
+}
