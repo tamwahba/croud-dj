@@ -1,3 +1,14 @@
+<a name="0.3.0"></a>
+# [0.3.0](https://github.com/tamwahba/croud-dj/compare/v0.2.0...v0.3.0) (2017-08-06)
+
+
+### Features
+
+* **search:** add base support for search starting with youtube ([4161df4](https://github.com/tamwahba/croud-dj/commit/4161df4))
+* **users:** add basic user support ([6b4fd82](https://github.com/tamwahba/croud-dj/commit/6b4fd82))
+
+
+
 <a name="0.2.0"></a>
 # [0.2.0](https://github.com/tamwahba/croud-dj/compare/v0.1.0...v0.2.0) (2017-07-27)
 
