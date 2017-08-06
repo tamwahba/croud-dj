@@ -6,6 +6,7 @@ export const RoomState = new Record({
   isLoading: true,
   isValid: false,
   name: '',
+  owner: '',
 });
 
 export function roomReducer(s = new RoomState(), action) {
@@ -16,6 +17,7 @@ export function roomReducer(s = new RoomState(), action) {
         isLoading: false,
         isValid: action.isValid,
         name: action.name,
+        owner: action.owner,
       });
       break;
     case ROOM_LOADING:

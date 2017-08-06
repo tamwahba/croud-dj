@@ -8,7 +8,7 @@ import { RoomState, roomReducer } from './reducer';
 expect.extend(expectImmutable);
 
 describe('core', () => {
-  describe('selected song', () => {
+  describe('room', () => {
     describe('reducer', () => {
       it('should correctly return state when called with undefined', () => {
         const defaultState = new RoomState();
@@ -20,14 +20,16 @@ describe('core', () => {
         const isLoading = false;
         const isValid = true;
         const name = 'name';
+        const owner = 'owner';
 
         const newState = new RoomState({
           isLoading,
           isValid,
           name,
+          owner,
         });
 
-        const result = roomReducer(undefined, roomChanged(name, isValid));
+        const result = roomReducer(undefined, roomChanged(name, isValid, owner));
         expect(result).toEqualImmutable(newState);
       });
 

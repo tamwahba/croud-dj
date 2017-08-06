@@ -2,7 +2,7 @@
 import expect from 'expect';
 
 import { SongStatuses } from '../song';
-import { mockDispatch } from '../test-utils';
+import { MockDatabase, mockDispatch, MockRef } from '../test-utils';
 
 import { CURRENT_SONG_UPDATE,
   currentSongUpdate,
@@ -15,18 +15,10 @@ import { CURRENT_SONG_UPDATE,
   watchCurrentSong } from './actions';
 
 describe('core', () => {
-  describe('current song', () => {
+  describe('current-song', () => {
     describe('actions', () => {
+      let mockDatabase;
       let roomName;
-
-      const mockRef = {
-        on: expect.createSpy(),
-        set: expect.createSpy(),
-      };
-
-      const mockDatabase = {
-        ref: expect.createSpy().andReturn(mockRef),
-      };
 
       function mockGetState() {
         return {
@@ -43,11 +35,8 @@ describe('core', () => {
       }
 
       beforeEach(() => {
+        mockDatabase = new MockDatabase();
         roomName = 'name';
-
-        mockDatabase.ref.reset();
-        mockRef.on.reset();
-        mockRef.set.reset();
       });
 
       describe('currentSongUpdate', () => {
@@ -65,6 +54,7 @@ describe('core', () => {
           const expectedActions = [
             currentSongUpdate(),
           ];
+          const mockRef = new MockRef();
 
           watchCurrentSong(mockRef)(mockDispatch(expectedActions));
 
@@ -82,7 +72,7 @@ describe('core', () => {
           changeCurrentSong(song, mockDatabase)(undefined, mockGetState);
 
           expect(mockDatabase.ref).toHaveBeenCalled();
-          expect(mockRef.set).toHaveBeenCalledWith(song);
+          expect(mockDatabase.refReturns[0].set).toHaveBeenCalledWith(song);
         });
       });
 
@@ -91,7 +81,7 @@ describe('core', () => {
           updateCurrentSong({}, mockDatabase)(undefined, mockGetState);
 
           expect(mockDatabase.ref).toHaveBeenCalled();
-          expect(mockRef.set).toHaveBeenCalled();
+          expect(mockDatabase.refReturns[0].set).toHaveBeenCalled();
         });
       });
 
@@ -101,7 +91,7 @@ describe('core', () => {
           updateCurrentSongElapsed(elapsed, mockDatabase)(undefined, mockGetState);
 
           expect(mockDatabase.ref).toHaveBeenCalled();
-          expect(mockRef.set).toHaveBeenCalledWith(elapsed);
+          expect(mockDatabase.refReturns[0].set).toHaveBeenCalledWith(elapsed);
         });
       });
 
@@ -111,7 +101,7 @@ describe('core', () => {
           updateCurrentSongStatus(status, mockDatabase)(undefined, mockGetState);
 
           expect(mockDatabase.ref).toHaveBeenCalled();
-          expect(mockRef.set).toHaveBeenCalledWith(status);
+          expect(mockDatabase.refReturns[0].set).toHaveBeenCalledWith(status);
         });
 
         it('should not update when status matches state', () => {
@@ -119,7 +109,6 @@ describe('core', () => {
           updateCurrentSongStatus(status, mockDatabase)(undefined, mockGetState);
 
           expect(mockDatabase.ref).toNotHaveBeenCalled();
-          expect(mockRef.set).toNotHaveBeenCalled();
         });
       });
 

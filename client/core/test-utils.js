@@ -39,3 +39,37 @@ export class MockFetch {
     return this.promise;
   }
 }
+
+export const MockRef = (path) => {
+  const childReturns = [];
+  const pathParts = path ? path.split('/') : [];
+  const key = pathParts[pathParts.length - 1];
+
+  return {
+    child: expect.createSpy().andCall((childKey) => {
+      const nested = new MockRef(path + childKey);
+      childReturns.push(nested);
+      return nested;
+    }),
+    childReturns,
+    key,
+    off: expect.createSpy(),
+    on: expect.createSpy(),
+    orderByChild: expect.createSpy(),
+    parent: pathParts[pathParts.length - 2] ? new MockRef(path.replace(`/${key}`, '')) : null,
+    set: expect.createSpy(),
+    update: expect.createSpy(),
+  };
+};
+
+export const MockDatabase = () => {
+  const refReturns = [];
+  return {
+    ref: expect.createSpy().andCall((path) => {
+      const nested = new MockRef(path);
+      refReturns.push(nested);
+      return nested;
+    }),
+    refReturns,
+  };
+};

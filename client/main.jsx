@@ -5,6 +5,7 @@ import { AppContainer } from 'react-hot-loader';
 import configureStore from './core/store';
 import Root from './views/root';
 
+import { watchCurrentUser } from './core/current-user';
 import { watchFirebase } from './core/firebase';
 
 import 'normalize.css';
@@ -21,6 +22,7 @@ function render() {
     rootElement);
 }
 
+store.dispatch(watchCurrentUser());
 store.dispatch(watchFirebase());
 
 if (module.hot) {

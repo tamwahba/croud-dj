@@ -1,5 +1,5 @@
 import { watchCurrentSong } from '../current-song';
-import { checkRoomExists } from '../firebase';
+import { app } from '../firebase';
 import { watchSongList } from '../song-lists';
 
 export const ROOM_CHANGED = 'ROOM_CHANGED';
@@ -11,25 +11,42 @@ export function roomLoading() {
   };
 }
 
-export function roomChanged(name, isValid) {
+export function roomChanged(name, isValid, owner) {
   return {
     type: ROOM_CHANGED,
     isValid,
     name,
+    owner,
   };
 }
 
-export function changeRoom(name, check = checkRoomExists) {
+export function watchRoom(name, database = app.database()) {
   return (dispatch) => {
-    dispatch(roomLoading());
-
-    return check(name)
-      .then((ref) => {
-        dispatch(roomChanged(ref.key, true));
+    database.ref(`rooms/${name}/owner`).on('value', (ds) => {
+      if (ds.exists()) {
+        const ref = ds.ref.parent;
+        dispatch(roomChanged(ref.key, true, ds.val()));
         dispatch(watchCurrentSong(ref.child('nowPlaying')));
         dispatch(watchSongList(ref.child('queue').orderByChild('votes'), `${ref.key}-queue`));
         dispatch(watchSongList(ref.child('played'), `${ref.key}-played`));
-      })
-      .catch(() => dispatch(roomChanged(name, false)));
+      } else {
+        dispatch(roomChanged(name, false));
+      }
+    });
+  };
+}
+
+export function changeRoom(name, database = app.database()) {
+  return (dispatch, getState) => {
+    const room = getState().room;
+    dispatch(roomLoading());
+    if (room.isValid) {
+      const ref = database.ref(`rooms/${room.name}`);
+      ref.child('nowPlaying').off();
+      ref.child('owner').off();
+      ref.child('played').off();
+      ref.child('queue').off();
+    }
+    dispatch(watchRoom(name, database));
   };
 }
