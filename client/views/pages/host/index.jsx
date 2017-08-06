@@ -5,30 +5,33 @@ import { connect } from 'react-redux';
 import { changeRoom } from '../../../core/room';
 import { SongStatuses } from '../../../core/song';
 import { addSong, downVoteSong, upVoteSong, SongListState } from '../../../core/song-lists';
+import { UserState } from '../../../core/users';
 
 import NowPlaying from '../../components/now-playing';
 import SongList from '../../components/song-list';
-import SongSelector from '../../components/song-selector';
+import SearchResults from '../../components/search-results';
+import SearchInput from '../../components/search-input';
 import PlayerContainer from '../../components/player-container';
 
 import './styles.less';
 
 export class UnconnectedHostPage extends React.Component {
   constructor(props) {
+    const { match } = props;
     super();
 
     this.handleDownVote = this.handleDownVote.bind(this);
     this.handleReplay = this.handleReplay.bind(this);
     this.handleUpVote = this.handleUpVote.bind(this);
 
-    props.dispatch(changeRoom(props.match.params.room));
+    props.changeRoom(match.params.room);
   }
 
   componentWillReceiveProps(newProps) {
-    const { dispatch, match } = newProps;
+    const { match } = newProps;
 
     if (this.props.match.params.room !== match.params.room) {
-      dispatch(changeRoom(match.params.room));
+      this.props.changeRoom(match.params.room);
     }
   }
 
@@ -46,15 +49,20 @@ export class UnconnectedHostPage extends React.Component {
   }
 
   render() {
-    const { isLoading, isValid } = this.props.room;
+    const { isLoading, isValid, owner } = this.props.room;
     if (!isLoading && !isValid) {
       return <div><h2>Room does not exist</h2></div>;
+    }
+
+    if (!isLoading && isValid && owner !== this.props.user.id) {
+      return <div><h2>Room owned by other user</h2></div>;
     }
 
     return (
       <div className="host">
         <NowPlaying showControls />
-        <SongSelector />
+        <SearchInput />
+        <SearchResults />
         <PlayerContainer />
         <h4>queue</h4>
         <SongList
@@ -82,6 +90,7 @@ UnconnectedHostPage.defaultProps = {
 };
 
 UnconnectedHostPage.propTypes = {
+  changeRoom: PropTypes.func.isRequired,
   dispatch: PropTypes.func.isRequired,
   match: PropTypes.shape({
     params: PropTypes.shape({
@@ -94,16 +103,26 @@ UnconnectedHostPage.propTypes = {
     isLoading: PropTypes.bool.isRequired,
     isValid: PropTypes.bool.isRequired,
     name: PropTypes.string.isRequired,
+    owner: PropTypes.string.isRequired,
   }).isRequired,
+  user: PropTypes.instanceOf(UserState).isRequired,
 };
 
 function mapStateToProps(state) {
   const room = state.room;
   return {
-    room,
     played: state.songLists.get(`${room.name}-played`),
     queue: state.songLists.get(`${room.name}-queue`),
+    room,
+    user: state.users.get(state.currentUser.id) || new UserState(),
   };
 }
 
-export default connect(mapStateToProps)(UnconnectedHostPage);
+function mapDispatchToProps(dispatch) {
+  return {
+    changeRoom: name => dispatch(changeRoom(name)),
+    dispatch,
+  };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(UnconnectedHostPage);

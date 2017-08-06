@@ -68,7 +68,7 @@ if (IS_DEVELOPMENT || IS_PRODUCTION) {
 }
 
 if (IS_DEVELOPMENT) {
-  config.devtool = 'cheap-module-source-map';
+  config.devtool = 'cheap-module-eval-source-map';
   config.entry.main.unshift(
     'react-hot-loader/patch',
     'babel-polyfill',
