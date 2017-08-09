@@ -21,7 +21,6 @@ export class UnconnectedSearchInput extends React.Component {
     return (
       <TextInput
         label="Search"
-        name="search"
         onChange={this.handleChange}
         onCommit={this.props.search}
         value={this.props.query}
