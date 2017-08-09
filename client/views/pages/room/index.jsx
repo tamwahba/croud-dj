@@ -1,8 +1,9 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
 
-import { changeRoom } from '../../../core/room';
+import { changeRoom, RoomState } from '../../../core/room';
 import { SongStatuses } from '../../../core/song';
 import { addSong, downVoteSong, upVoteSong, SongListState } from '../../../core/song-lists';
 import { UserState } from '../../../core/users';
@@ -15,7 +16,7 @@ import PlayerContainer from '../../components/player-container';
 
 import './styles.less';
 
-export class UnconnectedHostPage extends React.Component {
+export class UnconnectedRoomPage extends React.Component {
   constructor(props) {
     const { match } = props;
     super();
@@ -24,50 +25,52 @@ export class UnconnectedHostPage extends React.Component {
     this.handleReplay = this.handleReplay.bind(this);
     this.handleUpVote = this.handleUpVote.bind(this);
 
-    props.changeRoom(match.params.room);
+    props.changeRoom(match.params.id);
   }
 
   componentWillReceiveProps(newProps) {
     const { match } = newProps;
 
-    if (this.props.match.params.room !== match.params.room) {
-      this.props.changeRoom(match.params.room);
+    if (this.props.match.params.id !== match.params.id) {
+      this.props.changeRoom(match.params.id);
     }
   }
 
   handleDownVote(id) {
-    this.props.dispatch(downVoteSong(this.props.room.name, 'queue', id));
+    this.props.downVoteSong(this.props.room.name, 'queue', id);
   }
 
   handleReplay(id) {
     const song = this.props.played.songs.get(id);
-    this.props.dispatch(addSong(this.props.room.name, 'queue', song.merge({ elapsed: 0, status: SongStatuses.UNSTARTED }).toJS()));
+    this.props.addSong(this.props.room.name, 'queue', song.merge({ elapsed: 0, status: SongStatuses.UNSTARTED }).toJS());
   }
 
   handleUpVote(id) {
-    this.props.dispatch(upVoteSong(this.props.room.name, 'queue', id));
+    this.props.upVoteSong(this.props.room.name, 'queue', id);
   }
 
   render() {
     const { isLoading, isValid, owner } = this.props.room;
-    if (!isLoading && !isValid) {
-      return <div><h2>Room does not exist</h2></div>;
-    }
+    const exists = isLoading || (!isLoading && isValid);
+    const isHostPage = this.props.match.params.type === 'host';
+    const isOwner = owner === this.props.user.id;
 
-    if (!isLoading && isValid && owner !== this.props.user.id) {
+    if (!exists) {
+      return <div><h2>Room does not exist</h2></div>;
+    } else if (isHostPage && !isOwner) {
       return <div><h2>Room owned by other user</h2></div>;
     }
 
     return (
-      <div className="host">
-        <NowPlaying showControls />
+      <div className="room">
+        <NowPlaying showControls={isHostPage} />
         <SearchInput />
         <SearchResults />
-        <PlayerContainer />
+        {isHostPage && <PlayerContainer />}
         <h4>queue</h4>
         <SongList
           showVotes
-          className="list list--wide"
+          className="room__list room__list--wide"
           songList={this.props.queue}
           onSongUpVote={this.handleUpVote}
           onSongDownVote={this.handleDownVote}
@@ -75,7 +78,7 @@ export class UnconnectedHostPage extends React.Component {
         <h4>played</h4>
         <SongList
           showReplay
-          className="list"
+          className="room__list"
           songList={this.props.played}
           onSongReplay={this.handleReplay}
         />
@@ -84,28 +87,27 @@ export class UnconnectedHostPage extends React.Component {
   }
 }
 
-UnconnectedHostPage.defaultProps = {
+UnconnectedRoomPage.defaultProps = {
   played: new SongListState(),
   queue: new SongListState(),
+  user: new UserState(),
 };
 
-UnconnectedHostPage.propTypes = {
+UnconnectedRoomPage.propTypes = {
+  addSong: PropTypes.func.isRequired,
   changeRoom: PropTypes.func.isRequired,
-  dispatch: PropTypes.func.isRequired,
+  downVoteSong: PropTypes.func.isRequired,
   match: PropTypes.shape({
     params: PropTypes.shape({
-      room: PropTypes.string.isRequired,
+      id: PropTypes.string.isRequired,
+      type: PropTypes.string.isRequired,
     }).isRequired,
   }).isRequired,
   played: PropTypes.instanceOf(SongListState),
   queue: PropTypes.instanceOf(SongListState),
-  room: PropTypes.shape({
-    isLoading: PropTypes.bool.isRequired,
-    isValid: PropTypes.bool.isRequired,
-    name: PropTypes.string.isRequired,
-    owner: PropTypes.string.isRequired,
-  }).isRequired,
+  room: PropTypes.instanceOf(RoomState).isRequired,
   user: PropTypes.instanceOf(UserState).isRequired,
+  upVoteSong: PropTypes.func.isRequired,
 };
 
 function mapStateToProps(state) {
@@ -119,10 +121,7 @@ function mapStateToProps(state) {
 }
 
 function mapDispatchToProps(dispatch) {
-  return {
-    changeRoom: name => dispatch(changeRoom(name)),
-    dispatch,
-  };
+  return bindActionCreators({ addSong, changeRoom, downVoteSong, upVoteSong }, dispatch);
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(UnconnectedHostPage);
+export default connect(mapStateToProps, mapDispatchToProps)(UnconnectedRoomPage);

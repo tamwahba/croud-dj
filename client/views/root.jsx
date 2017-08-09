@@ -1,21 +1,21 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import { Provider } from 'react-redux';
-import { BrowserRouter, Route } from 'react-router-dom';
+import { BrowserRouter, Route, Switch } from 'react-router-dom';
 
 import App from './app/index';
 import HomePage from './pages/home';
-import HostPage from './pages/host';
+import RoomPage from './pages/room';
 
 function Root({ store }) {
   return (
     <Provider store={store}>
       <BrowserRouter>
         <App>
-          <div>
+          <Switch>
             <Route exact path="/" component={HomePage} />
-            <Route exact path="/host/:room" component={HostPage} />
-          </div>
+            <Route path="/:type/:id" component={RoomPage} />
+          </Switch>
         </App>
       </BrowserRouter>
     </Provider>
