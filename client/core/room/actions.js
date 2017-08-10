@@ -20,6 +20,21 @@ export function roomChanged(name, isValid, owner) {
   };
 }
 
+export function checkRoomExists(name, database = app.database()) {
+  return () =>
+    database.ref(`rooms/${name}/owner`)
+      .once('value')
+      .then(ds => ds.exists());
+}
+
+export function createRoom(name, userID, database = app.database()) {
+  return () =>
+    database.ref(`rooms/${name}/owner`)
+      .set(userID)
+      .then(() => database.ref(`users/${userID}/rooms/${name}`).set(true));
+}
+
+
 export function watchRoom(name, database = app.database()) {
   return (dispatch) => {
     database.ref(`rooms/${name}/owner`).on('value', (ds) => {

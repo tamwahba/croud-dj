@@ -1,2 +1,2 @@
-export { changeRoom, watchRoom } from './actions';
+export { changeRoom, checkRoomExists, createRoom, watchRoom } from './actions';
 export { roomReducer, RoomState } from './reducer';
