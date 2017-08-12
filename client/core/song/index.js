@@ -1,1 +1,1 @@
-export { SongServices, SongState, SongStatuses } from './constants';
+export { SongServices, SongState, SongStatuses, VoteDirections } from './constants';

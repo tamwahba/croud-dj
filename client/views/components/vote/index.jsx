@@ -34,15 +34,23 @@ class Vote extends React.Component {
   }
 
   render() {
-    const { className, count } = this.props;
+    const { className, count, disableDownVote, disableUpVote } = this.props;
 
     return (
       <div className={`vote ${className}`}>
-        <Button className="vote__button" onClick={this.handleUpVoteClick}>
+        <Button
+          className="vote__button"
+          disabled={disableUpVote}
+          onClick={this.handleUpVoteClick}
+        >
           <Icon data={chevronUp} alt="up vote" />
         </Button>
         <span className="vote__count">{count}</span>
-        <Button className="vote__button" onClick={this.handleDownVoteClick}>
+        <Button
+          className="vote__button"
+          disabled={disableDownVote}
+          onClick={this.handleDownVoteClick}
+        >
           <Icon data={chevronDown} alt="down vote" />
         </Button>
       </div>
@@ -52,10 +60,14 @@ class Vote extends React.Component {
 
 Vote.defaultProps = {
   className: '',
+  disableDownVote: false,
+  disableUpVote: false,
 };
 
 Vote.propTypes = {
   className: PropTypes.string,
+  disableDownVote: PropTypes.bool,
+  disableUpVote: PropTypes.bool,
   id: PropTypes.string.isRequired,
   onDownVote: PropTypes.func.isRequired,
   onUpVote: PropTypes.func.isRequired,

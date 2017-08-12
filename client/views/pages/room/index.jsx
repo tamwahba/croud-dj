@@ -57,16 +57,31 @@ export class UnconnectedRoomPage extends React.Component {
   }
 
   handleDownVote(id) {
-    this.props.downVoteSong(this.props.room.name, 'queue', id);
+    const userID = this.props.user.id;
+    this.props.downVoteSong(
+      this.props.room.name,
+      'queue',
+      id,
+      userID,
+      this.props.queue.songs.get(id).votes.get(userID));
   }
 
   handleReplay(id) {
     const song = this.props.played.songs.get(id);
-    this.props.addSong(this.props.room.name, 'queue', song.merge({ elapsed: 0, status: SongStatuses.UNSTARTED }).toJS());
+    this.props.addSong(
+      this.props.room.name,
+      'queue',
+      song.merge({ elapsed: 0, status: SongStatuses.UNSTARTED }).toJS());
   }
 
   handleUpVote(id) {
-    this.props.upVoteSong(this.props.room.name, 'queue', id);
+    const userID = this.props.user.id;
+    this.props.upVoteSong(
+      this.props.room.name,
+      'queue',
+      id,
+      userID,
+      this.props.queue.songs.get(id).votes.get(userID));
   }
 
   hostNewRoom(value, isValid) {
@@ -95,7 +110,8 @@ export class UnconnectedRoomPage extends React.Component {
   }
 
   render() {
-    const { isLoading, isValid, owner } = this.props.room;
+    const { room, user } = this.props;
+    const { isLoading, isValid, owner } = room;
     const exists = isLoading || (!isLoading && isValid);
     const isHostPage = this.props.match.params.type === 'host';
     const isOwner = owner === this.props.user.id;
@@ -160,6 +176,7 @@ export class UnconnectedRoomPage extends React.Component {
             songList={this.props.queue}
             onSongUpVote={this.handleUpVote}
             onSongDownVote={this.handleDownVote}
+            userID={user.id}
           />
           <h4>played</h4>
           <SongList
@@ -167,6 +184,7 @@ export class UnconnectedRoomPage extends React.Component {
             className="room__list"
             songList={this.props.played}
             onSongReplay={this.handleReplay}
+            userID={user.id}
           />
         </div>
       </div>

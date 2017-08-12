@@ -1,4 +1,4 @@
-import { Record } from 'immutable';
+import { Map, Record } from 'immutable';
 
 export const SongServices = Object.freeze({
   EMPTY: 'EMPTY',
@@ -22,8 +22,14 @@ export const SongState = new Record({
   elapsed: 0,
   id: '',
   title: '',
+  score: 0,
   service: SongServices.EMPTY,
   skips: 0,
   status: SongStatuses.EMPTY,
-  votes: 0,
+  votes: new Map(),
+});
+
+export const VoteDirections = Object.freeze({
+  DOWN: 'DOWN',
+  UP: 'UP',
 });

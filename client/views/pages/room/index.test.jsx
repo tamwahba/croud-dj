@@ -49,7 +49,10 @@ describe('views', () => {
               order: Immutable.fromJS(['played-song']),
               songs: Immutable.fromJS({ 'played-song': new SongState() }),
             })}
-            queue={new SongListState()}
+            queue={new SongListState({
+              order: Immutable.fromJS(['queue-song']),
+              songs: Immutable.fromJS({ 'queue-song': new SongState() }),
+            })}
             room={new RoomState({ isLoading: false, isValid: true, name: 'name', owner: 'owner' })}
             user={new UserState({ id: 'owner' })}
             upVoteSong={upVoteSong}
@@ -136,7 +139,7 @@ describe('views', () => {
 
       describe('.handleDownVote', () => {
         it('should call prop downVoteSong', () => {
-          room.instance().handleDownVote();
+          room.instance().handleDownVote('queue-song');
 
           expect(downVoteSong).toHaveBeenCalled();
         });
@@ -152,7 +155,7 @@ describe('views', () => {
 
       describe('.handleUpVote', () => {
         it('should call prop upVoteSong', () => {
-          room.instance().handleUpVote();
+          room.instance().handleUpVote('queue-song');
 
           expect(upVoteSong).toHaveBeenCalled();
         });
