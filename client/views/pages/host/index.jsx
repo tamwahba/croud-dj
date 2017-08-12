@@ -30,7 +30,7 @@ export class UnconnectedHostPage extends React.Component {
 
   validateRoom(value) {
     return this.props.checkRoomExists(value)
-      .then(exists => ({ errorText: 'Already exists', isValid: exists }));
+      .then(exists => ({ errorText: 'Already exists', isValid: !exists }));
   }
 
   render() {

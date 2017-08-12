@@ -99,8 +99,7 @@ describe('views', () => {
         it('should resolve with object with properties errorText and isValid', () => {
           return host.instance().validateRoom()
             .then((result) => {
-              expect(result.errorText).toExist();
-              expect(result.isValid).toExist();
+              expect(result).toIncludeKeys(['errorText', 'isValid']);
             });
         });
       });
