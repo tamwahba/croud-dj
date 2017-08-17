@@ -2,68 +2,106 @@
 import { shallow } from 'enzyme';
 import expect from 'expect';
 import enzymify from 'expect-enzyme';
+import expectImmutable from 'expect-immutable';
+import Immutable, { List } from 'immutable';
 import React from 'react';
+
+import { UserState } from '../../../core/users';
+
+import LinkList from '../../components/link-list';
 
 import { UnconnectedHostPage } from './index';
 
-import { SongListState } from '../../../core/song-lists';
-import { UserState } from '../../../core/users';
-
 expect.extend(enzymify());
+expect.extend(expectImmutable);
 
 describe('views', () => {
   describe('pages', () => {
     describe('host', () => {
-      const changeRoom = expect.createSpy();
-      const dispatch = expect.createSpy().andReturn(Promise.resolve());
+      const checkRoomExists = expect.createSpy().andReturn(Promise.resolve(true));
+      const createRoomPromise = Promise.resolve();
+      const createRoom = expect.createSpy().andReturn(createRoomPromise);
+      const push = expect.createSpy();
+      const user = new UserState({
+        roomIDs: new List(['id1', 'id2']),
+      });
+
       let host;
 
       beforeEach(() => {
-        changeRoom.reset();
-        dispatch.reset();
+        checkRoomExists.reset();
+        createRoom.reset();
+        push.reset();
 
-        host = shallow(
-          <UnconnectedHostPage
-            changeRoom={changeRoom}
-            dispatch={dispatch}
-            match={{ params: { room: 'name' } }}
-            played={new SongListState()}
-            queue={new SongListState()}
-            room={{ isLoading: false, isValid: true, name: 'name', owner: 'owner' }}
-            user={new UserState({ id: 'owner' })}
-          />);
+        host = shallow(<UnconnectedHostPage
+          checkRoomExists={checkRoomExists}
+          createRoom={createRoom}
+          history={{ push }}
+          user={user}
+        />);
       });
 
       it('should have class `.host`', () => {
         expect(host).toHaveClass('host');
       });
 
-      it('should call prop changeRoom on navigation change', () => {
-        expect(changeRoom).toHaveBeenCalled();
+      it('should contain a <LinkList />', () => {
+        expect(host).toContain(LinkList);
       });
 
-      it('should call prop changeRoom on url change', () => {
-        host.setProps({
-          match: {
-            params: {
-              room: 'other-name',
-            },
-          },
-        });
-        expect(changeRoom.calls.length).toEqual(2);
+      it('should not contain a <LinkList /> when user.roomIDs is empty', () => {
+        host.setProps({ user: user.set('roomIDs', new List()) });
+
+        expect(host).toNotContain(LinkList);
       });
 
-      it('should render a loading screen when room.isValid and room.isLoading are false', () => {
-        host.setProps({
-          room: {
-            name: '',
-            isLoading: false,
-            isValid: false,
-            owner: 'owner',
-          },
+      it('should map room ids to Maps for <LinkList />', () => {
+        expect(host.find(LinkList).prop('links'))
+          .toEqualImmutable(Immutable.fromJS([
+            { url: '/host/id1', text: 'id1' },
+            { url: '/host/id2', text: 'id2' },
+          ]));
+      });
+
+      describe('.navigateToRoom', () => {
+        const value = 'value';
+        it('should call prop createRoom when isValid is true', () => {
+          host.instance().navigateToRoom(value, true);
+
+          expect(createRoom).toHaveBeenCalledWith(value, user.id);
         });
 
-        expect(host).toHaveRendered(<div><h2>Room does not exist</h2></div>);
+        it('should call prop history.push when isValid is true', () => {
+          host.instance().navigateToRoom(value, true);
+
+          return createRoomPromise
+            .then(() => {
+              expect(push).toHaveBeenCalledWith(`/host/${value}`);
+            });
+        });
+
+        it('should do nothinf when isValid is false', () => {
+          host.instance().navigateToRoom(value, false);
+
+          expect(createRoom).toNotHaveBeenCalled();
+          expect(push).toNotHaveBeenCalled();
+        });
+      });
+
+      describe('.validateRoom', () => {
+        it('should call prop checkRoomExists', () => {
+          const value = 'value';
+          host.instance().validateRoom(value);
+
+          expect(checkRoomExists).toHaveBeenCalledWith(value);
+        });
+
+        it('should resolve with object with properties errorText and isValid', () => {
+          return host.instance().validateRoom()
+            .then((result) => {
+              expect(result).toIncludeKeys(['errorText', 'isValid']);
+            });
+        });
       });
     });
   });

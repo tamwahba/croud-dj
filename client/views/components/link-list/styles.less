@@ -1,0 +1,24 @@
+@import '../../styles/constants.less';
+
+.link-list {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+
+  &__item {
+    margin: 5px 0;
+  }
+
+  &__link {
+    color: @secondary-color;
+    display: block;
+    padding: 4px;
+
+    &:active,
+    &:focus,
+    &:link,
+    &:visited {
+      text-decoration: none;
+    }
+  }
+}

@@ -2,7 +2,25 @@
 
 .player-container {
   box-shadow: 0 0 10px 2px @primary-color;
-  height: 360px;
   margin: 4px;
-  width: 640px;
+  position: relative;
+
+  &__content {
+    &--youtube {
+      bottom: 0;
+      left: 0;
+      position: absolute;
+      right: 0;
+      top: 0;
+    }
+  }
+
+  &--youtube {
+    &:before {
+      display: block;
+      content: '';
+      padding-top: ((9 / 16) * 100%);
+      width: 100%;
+    }
+  }
 }

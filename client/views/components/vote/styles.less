@@ -1,9 +1,12 @@
+@import '../../styles/constants.less';
+
 .vote {
   align-items: center;
   display: flex;
   flex-basis: 60px;
   flex-flow: row wrap;
   justify-content: space-around;
+  text-align: center;
 
   &__button {
     margin: 0 20px;
@@ -11,6 +14,7 @@
   }
 
   &__count {
-    color: green;
+    color: @primary-color;
+    min-width: 20px;
   }
 }

@@ -13,7 +13,6 @@ describe('views', () => {
     describe('text-input', () => {
       const value = 'value';
       const label = 'label';
-      const name = 'name';
       const onBlur = expect.createSpy();
       const onChange = expect.createSpy();
       const onCommit = expect.createSpy();
@@ -29,7 +28,6 @@ describe('views', () => {
         textInput = shallow(<TextInput
           value={value}
           label={label}
-          name={name}
           onBlur={onBlur}
           onChange={onChange}
           onCommit={onCommit}
@@ -46,6 +44,34 @@ describe('views', () => {
         expect(textInput).toContain('span.text-input');
       });
 
+      it('should have input id match label htmlFor', () => {
+        expect(textInput.find('input')).toHaveProp('id');
+        const inputID = textInput.find('input').props().id;
+
+        expect(textInput.find('label')).toHaveProp('htmlFor', inputID);
+      });
+
+      it('should have different input id for each instance', () => {
+        const otherTextInput = shallow(<TextInput
+          value={value}
+          label={label}
+          onBlur={onBlur}
+          onChange={onChange}
+          onCommit={onCommit}
+          password={password}
+          validate={validate}
+        />);
+
+        expect(textInput.find('input')).toHaveProp('id');
+        expect(otherTextInput.find('input')).toHaveProp('id');
+
+
+        const id = textInput.find('input').props().id;
+        const otherID = otherTextInput.find('input').props().id;
+
+        expect(id).toNotEqual(otherID);
+      });
+
       it('should have input type text when prop password is false', () => {
         textInput.setProps({ password: false });
 
@@ -56,6 +82,18 @@ describe('views', () => {
         textInput.setProps({ password: true });
 
         expect(textInput).toContain('input[type="password"]');
+      });
+
+      it('should update input value when prop value changes', () => {
+        const newValue = 'new-value';
+
+        expect(textInput).toHaveState({ value });
+        expect(textInput.find('input')).toHaveProp('value', value);
+
+        textInput.setProps({ value: newValue });
+
+        expect(textInput).toHaveState({ value: newValue });
+        expect(textInput.find('input')).toHaveProp('value', newValue);
       });
 
       it('should call prop onBlur when input is unfocused', () => {

@@ -20,8 +20,7 @@ export class UnconnectedSearchInput extends React.Component {
   render() {
     return (
       <TextInput
-        label="Search"
-        name="search"
+        label="Add Song"
         onChange={this.handleChange}
         onCommit={this.props.search}
         value={this.props.query}

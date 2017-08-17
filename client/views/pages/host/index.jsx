@@ -1,128 +1,79 @@
+import { Map } from 'immutable';
 import PropTypes from 'prop-types';
 import React from 'react';
 import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
 
-import { changeRoom } from '../../../core/room';
-import { SongStatuses } from '../../../core/song';
-import { addSong, downVoteSong, upVoteSong, SongListState } from '../../../core/song-lists';
+import { checkRoomExists, createRoom } from '../../../core/room';
 import { UserState } from '../../../core/users';
 
-import NowPlaying from '../../components/now-playing';
-import SongList from '../../components/song-list';
-import SearchResults from '../../components/search-results';
-import SearchInput from '../../components/search-input';
-import PlayerContainer from '../../components/player-container';
+import LinkList from '../../components/link-list';
+import TextInput from '../../components/text-input';
 
 import './styles.less';
 
 export class UnconnectedHostPage extends React.Component {
-  constructor(props) {
-    const { match } = props;
+  constructor() {
     super();
 
-    this.handleDownVote = this.handleDownVote.bind(this);
-    this.handleReplay = this.handleReplay.bind(this);
-    this.handleUpVote = this.handleUpVote.bind(this);
-
-    props.changeRoom(match.params.room);
+    this.navigateToRoom = this.navigateToRoom.bind(this);
+    this.validateRoom = this.validateRoom.bind(this);
   }
 
-  componentWillReceiveProps(newProps) {
-    const { match } = newProps;
-
-    if (this.props.match.params.room !== match.params.room) {
-      this.props.changeRoom(match.params.room);
+  navigateToRoom(value, isValid) {
+    const { history, user } = this.props;
+    if (isValid) {
+      this.props.createRoom(value, user.id)
+        .then(() => history.push(`/host/${value}`));
     }
   }
 
-  handleDownVote(id) {
-    this.props.dispatch(downVoteSong(this.props.room.name, 'queue', id));
-  }
-
-  handleReplay(id) {
-    const song = this.props.played.songs.get(id);
-    this.props.dispatch(addSong(this.props.room.name, 'queue', song.merge({ elapsed: 0, status: SongStatuses.UNSTARTED }).toJS()));
-  }
-
-  handleUpVote(id) {
-    this.props.dispatch(upVoteSong(this.props.room.name, 'queue', id));
+  validateRoom(value) {
+    return this.props.checkRoomExists(value)
+      .then(exists => ({ errorText: 'Already exists', isValid: !exists }));
   }
 
   render() {
-    const { isLoading, isValid, owner } = this.props.room;
-    if (!isLoading && !isValid) {
-      return <div><h2>Room does not exist</h2></div>;
-    }
-
-    if (!isLoading && isValid && owner !== this.props.user.id) {
-      return <div><h2>Room owned by other user</h2></div>;
-    }
+    const { user } = this.props;
 
     return (
       <div className="host">
-        <NowPlaying showControls />
-        <SearchInput />
-        <SearchResults />
-        <PlayerContainer />
-        <h4>queue</h4>
-        <SongList
-          showVotes
-          className="list list--wide"
-          songList={this.props.queue}
-          onSongUpVote={this.handleUpVote}
-          onSongDownVote={this.handleDownVote}
+        <h4>Create a new room</h4>
+        <TextInput
+          label="Room Name"
+          onCommit={this.navigateToRoom}
+          validate={this.validateRoom}
         />
-        <h4>played</h4>
-        <SongList
-          showReplay
-          className="list"
-          songList={this.props.played}
-          onSongReplay={this.handleReplay}
-        />
+        {!user.roomIDs.isEmpty() && [
+          <h4 key="contiue">Continue hosting previous room</h4>,
+          <LinkList links={user.roomIDs.map(id => new Map({ url: `/host/${id}`, text: id }))} key="roomList" />,
+        ]}
       </div>
     );
   }
 }
 
 UnconnectedHostPage.defaultProps = {
-  played: new SongListState(),
-  queue: new SongListState(),
+  user: new UserState(),
 };
 
 UnconnectedHostPage.propTypes = {
-  changeRoom: PropTypes.func.isRequired,
-  dispatch: PropTypes.func.isRequired,
-  match: PropTypes.shape({
-    params: PropTypes.shape({
-      room: PropTypes.string.isRequired,
-    }).isRequired,
+  checkRoomExists: PropTypes.func.isRequired,
+  createRoom: PropTypes.func.isRequired,
+  history: PropTypes.shape({
+    push: PropTypes.func.isRequired,
   }).isRequired,
-  played: PropTypes.instanceOf(SongListState),
-  queue: PropTypes.instanceOf(SongListState),
-  room: PropTypes.shape({
-    isLoading: PropTypes.bool.isRequired,
-    isValid: PropTypes.bool.isRequired,
-    name: PropTypes.string.isRequired,
-    owner: PropTypes.string.isRequired,
-  }).isRequired,
-  user: PropTypes.instanceOf(UserState).isRequired,
+  user: PropTypes.instanceOf(UserState),
 };
 
 function mapStateToProps(state) {
-  const room = state.room;
   return {
-    played: state.songLists.get(`${room.name}-played`),
-    queue: state.songLists.get(`${room.name}-queue`),
-    room,
-    user: state.users.get(state.currentUser.id) || new UserState(),
+    user: state.users.get(state.currentUser.id),
   };
 }
 
 function mapDispatchToProps(dispatch) {
-  return {
-    changeRoom: name => dispatch(changeRoom(name)),
-    dispatch,
-  };
+  return bindActionCreators({ checkRoomExists, createRoom }, dispatch);
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(UnconnectedHostPage);

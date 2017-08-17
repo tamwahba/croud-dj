@@ -11,6 +11,7 @@ export const UserState = new Record({
   name: 'Anonymous User',
   nickname: 'anonymous',
   photo: '',
+  roomIDs: new List(),
 });
 
 export function usersReducer(s = new Map(), action) {
@@ -20,7 +21,8 @@ export function usersReducer(s = new Map(), action) {
   switch (action.type) {
     case USERS_USER_ADD:
       userState = new UserState(action.user)
-        .set('friendIDs', new List(Object.keys(action.user.friends || {})));
+        .set('friendIDs', new List(Object.keys(action.user.friends || {})))
+        .set('roomIDs', new List(Object.keys(action.user.rooms || {})));
       state = state.set(action.user.id, userState);
       break;
     case USERS_USER_REMOVE:
@@ -28,7 +30,8 @@ export function usersReducer(s = new Map(), action) {
       break;
     case USERS_USER_UPDATE:
       userState = new UserState(action.user)
-        .set('friendIDs', new List(Object.keys(action.user.friends || {})));
+        .set('friendIDs', new List(Object.keys(action.user.friends || {})))
+        .set('roomIDs', new List(Object.keys(action.user.rooms || {})));
       state = state.mergeDeep({
         [action.user.id]: userState,
       });

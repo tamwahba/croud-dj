@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 
+import { VoteDirections } from '../../../core/song';
 import { SongListState } from '../../../core/song-lists';
 
 import Button from '../button';
@@ -23,14 +24,28 @@ function SongList(props) {
     onSongReplay,
     showReplay,
     showVotes,
-    songList } = props;
+    songList,
+    userID } = props;
   const { songs, order } = songList;
 
   let accessory;
   if (showVotes) {
-    accessory = (id, votes) => (
-      <Vote count={votes} id={id} onDownVote={onSongDownVote} onUpVote={onSongUpVote} />
-    );
+    accessory = (id, song) => {
+      const vote = song.votes.get(userID, '');
+      const disableDownVote = vote === VoteDirections.DOWN;
+      const disableUpVote = vote === VoteDirections.UP;
+
+      return (
+        <Vote
+          count={song.score * -1}
+          disableDownVote={disableDownVote}
+          disableUpVote={disableUpVote}
+          id={id}
+          onDownVote={onSongDownVote}
+          onUpVote={onSongUpVote}
+        />
+      );
+    };
   } else if (showReplay) {
     accessory = id => (
       <Button className="button" onClick={handleReplayClick(id, onSongReplay)}>
@@ -47,7 +62,7 @@ function SongList(props) {
         const song = songs.get(songKey);
         return (
           <li className="song-list__item" key={songKey}>
-            <SongCard song={song} accessory={accessory(songKey, song.votes * -1)} />
+            <SongCard song={song} accessory={accessory(songKey, song)} />
           </li>
         );
       })}
@@ -64,6 +79,7 @@ SongList.defaultProps = {
   showReplay: false,
   showVotes: false,
   songList: new SongListState(),
+  userID: '',
 };
 
 SongList.propTypes = {
@@ -75,6 +91,7 @@ SongList.propTypes = {
   showReplay: PropTypes.bool,
   showVotes: PropTypes.bool,
   songList: PropTypes.instanceOf(SongListState),
+  userID: PropTypes.string,
 };
 
 export default SongList;

@@ -10,6 +10,14 @@
   outline: none;
   padding: 2px;
 
+  &:disabled {
+    color: fade(@secondary-color, 50%);
+
+    &:hover {
+      cursor: not-allowed;
+    }
+  }
+
   &:hover {
     cursor: pointer;
   }

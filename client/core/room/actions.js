@@ -20,6 +20,21 @@ export function roomChanged(name, isValid, owner) {
   };
 }
 
+export function checkRoomExists(name, database = app.database()) {
+  return () =>
+    database.ref(`rooms/${name}/owner`)
+      .once('value')
+      .then(ds => ds.exists());
+}
+
+export function createRoom(name, userID, database = app.database()) {
+  return () =>
+    database.ref(`rooms/${name}/owner`)
+      .set(userID)
+      .then(() => database.ref(`users/${userID}/rooms/${name}`).set(true));
+}
+
+
 export function watchRoom(name, database = app.database()) {
   return (dispatch) => {
     database.ref(`rooms/${name}/owner`).on('value', (ds) => {
@@ -27,7 +42,7 @@ export function watchRoom(name, database = app.database()) {
         const ref = ds.ref.parent;
         dispatch(roomChanged(ref.key, true, ds.val()));
         dispatch(watchCurrentSong(ref.child('nowPlaying')));
-        dispatch(watchSongList(ref.child('queue').orderByChild('votes'), `${ref.key}-queue`));
+        dispatch(watchSongList(ref.child('queue').orderByChild('score'), `${ref.key}-queue`));
         dispatch(watchSongList(ref.child('played'), `${ref.key}-played`));
       } else {
         dispatch(roomChanged(name, false));

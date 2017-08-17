@@ -1,6 +1,6 @@
 import { List, Map, Record } from 'immutable';
 
-import { SongState } from '../song';
+import { SongState, VoteState } from '../song';
 
 import { SONG_LISTS_LIST_LOADED,
   SONG_LISTS_SONG_ADDED,
@@ -28,10 +28,19 @@ export function songListsReducer(s = new Map(), action) {
         const idx = order.indexOf(action.previousSongKey);
         return order.insert(idx + 1, action.songKey);
       });
-      state = state.updateIn([action.listKey, 'songs'], new Map(), songs => songs.set(action.songKey, new SongState(action.song)));
+      state = state.updateIn(
+        [action.listKey, 'songs'],
+        new Map(),
+        songs => songs.set(
+          action.songKey,
+          new SongState(action.song).set('votes', new Map(action.song.votes || {}))));
       break;
     case SONG_LISTS_SONG_CHANGED:
-      state = state.updateIn([action.listKey, 'songs'], songs => songs.set(action.songKey, new SongState(action.song)));
+      state = state.updateIn(
+        [action.listKey, 'songs'],
+        songs => songs.set(
+          action.songKey,
+          new SongState(action.song).set('votes', new Map(action.song.votes || {}))));
       break;
     case SONG_LISTS_SONG_MOVED:
       state = state.updateIn([action.listKey, 'order'], (o) => {

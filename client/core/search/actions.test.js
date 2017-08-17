@@ -2,7 +2,7 @@
 import expect from 'expect';
 
 import { SongServices } from '../song';
-import { mockDispatch, MockFetch } from '../test-utils';
+import { mockDispatch, MockPromise } from '../test-utils';
 
 import { SEARCH_CLEAR,
   SEARCH_START,
@@ -86,7 +86,7 @@ describe('core', () => {
 
       describe('searchYouTube', () => {
         /* eslint-env browser */
-        const mockFetch = new MockFetch();
+        const mockFetch = new MockPromise();
         const mockItems = [
           {
             kind: 'youtube#video',
@@ -133,7 +133,7 @@ describe('core', () => {
         ];
 
         before(() => {
-          expect.spyOn(window, 'fetch').andCall(mockFetch.fetch);
+          expect.spyOn(window, 'fetch').andCall(() => mockFetch.promise);
         });
 
         beforeEach(() => {

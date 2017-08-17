@@ -1,5 +1,7 @@
+import { Map } from 'immutable';
+
 import { app } from '../firebase';
-import { SongState } from '../song';
+import { SongState, VoteDirections } from '../song';
 
 export const SONG_LISTS_LIST_LOADED = 'SONG_LISTS_LIST_LOADED';
 export const SONG_LISTS_SONG_ADDED = 'SONG_LISTS_SONG_ADDED';
@@ -60,7 +62,8 @@ export function watchSongList(firebaseRef, listKey) {
       const order = [];
       const map = {};
       ds.forEach((child) => {
-        map[child.key] = new SongState(child.val());
+        const value = child.val();
+        map[child.key] = new SongState(value).set('votes', new Map(value.votes));
         order.push(child.key);
       });
       dispatch(songListsLoad(listKey, order, map));
@@ -88,14 +91,22 @@ export function watchSongList(firebaseRef, listKey) {
 
 export function addSong(roomName, listKey, s) {
   return () => {
-    const song = Object.assign({}, s, { votes: 0 });
+    const song = Object.assign({}, s, { score: 0, votes: null });
     app.database().ref(`rooms/${roomName}/${listKey}`).push(song);
   };
 }
 
-export function downVoteSong(roomName, listKey, songKey) {
+export function downVoteSong(roomName, listKey, songKey, userID, previousVote) {
   return () => {
-    app.database().ref(`rooms/${roomName}/${listKey}/${songKey}/votes`).transaction(val => val + 1);
+    let inc = 1;
+    if (previousVote === VoteDirections.DOWN) {
+      inc = 0;
+    } else if (previousVote === VoteDirections.UP) {
+      inc = 2;
+    }
+
+    app.database().ref(`rooms/${roomName}/${listKey}/${songKey}/score`).transaction(val => val + inc);
+    app.database().ref(`rooms/${roomName}/${listKey}/${songKey}/votes/${userID}`).set(VoteDirections.DOWN);
   };
 }
 
@@ -105,8 +116,16 @@ export function removeSong(roomName, listKey, songKey) {
   };
 }
 
-export function upVoteSong(roomName, listKey, songKey) {
+export function upVoteSong(roomName, listKey, songKey, userID, previousVote) {
   return () => {
-    app.database().ref(`rooms/${roomName}/${listKey}/${songKey}/votes`).transaction(val => val - 1);
+    let inc = 1;
+    if (previousVote === VoteDirections.DOWN) {
+      inc = 2;
+    } else if (previousVote === VoteDirections.UP) {
+      inc = 0;
+    }
+
+    app.database().ref(`rooms/${roomName}/${listKey}/${songKey}/score`).transaction(val => val - inc);
+    app.database().ref(`rooms/${roomName}/${listKey}/${songKey}/votes/${userID}`).set(VoteDirections.UP);
   };
 }
