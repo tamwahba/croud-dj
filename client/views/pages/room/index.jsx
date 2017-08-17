@@ -19,6 +19,10 @@ import PlayerContainer from '../../components/player-container';
 
 import './styles.less';
 
+const panelBlock = new BEMhelper({
+  name: 'panel',
+  outputIsString: true,
+});
 const roomBlock = new BEMhelper({
   name: 'room',
   outputIsString: true,
@@ -116,15 +120,16 @@ export class UnconnectedRoomPage extends React.Component {
     const isHostPage = this.props.match.params.type === 'host';
     const isOwner = owner === this.props.user.id;
     const modifiers = {
+      host: isHostPage,
       overlaid: !exists || (isHostPage && !isOwner),
     };
     const roomID = this.props.match.params.id;
 
-    let overlayContent;
+    let overlay;
 
     if (!exists) {
-      overlayContent = (
-        <div>
+      overlay = (
+        <div className={roomBlock('overlay', modifiers)}>
           <h3>This room does not exist!</h3>
           <h4>You can host a new room:</h4>
           <TextInput
@@ -142,8 +147,8 @@ export class UnconnectedRoomPage extends React.Component {
         </div>
       );
     } else if (isHostPage && !isOwner) {
-      overlayContent = (
-        <div>
+      overlay = (
+        <div className={roomBlock('overlay', modifiers)}>
           <h3>This room is owned by someone else!</h3>
           <h4>
             Did you mean to <Link to={`/guest/${roomID}`}>join {roomID} as a guest</Link> ?
@@ -159,33 +164,73 @@ export class UnconnectedRoomPage extends React.Component {
       );
     }
 
-    return (
-      <div className={roomBlock({ modifiers })}>
-        <div className={roomBlock('overlay', modifiers)}>
-          {overlayContent}
+    const playedModifiers = Object.assign({}, modifiers, {
+      played: true,
+    });
+    const played = (
+      <div className={panelBlock({ extra: roomBlock('panel', playedModifiers) })}>
+        <h3 className={panelBlock('title')}>Already Played</h3>
+        <div className={panelBlock('content')}>
+          <SongList
+            showReplay
+            className={roomBlock('list', playedModifiers)}
+            songList={this.props.played}
+            onSongReplay={this.handleReplay}
+            userID={user.id}
+          />
         </div>
-        <div className={roomBlock('content', modifiers)}>
-          <NowPlaying showControls={isHostPage} />
-          <SearchInput />
-          <SearchResults />
-          {isHostPage && !overlayContent && <PlayerContainer />}
-          <h4>queue</h4>
+      </div>
+    );
+
+    const queueModifiers = Object.assign({}, modifiers, {
+      queue: true,
+      wide: true,
+    });
+    const queue = (
+      <div className={panelBlock({ extra: roomBlock('panel', queueModifiers) })}>
+        <h3 className={panelBlock('title')}>Up Next</h3>
+        <div className={panelBlock('content')}>
           <SongList
             showVotes
-            className="room__list room__list--wide"
+            className={roomBlock('list', queueModifiers)}
             songList={this.props.queue}
             onSongUpVote={this.handleUpVote}
             onSongDownVote={this.handleDownVote}
             userID={user.id}
           />
-          <h4>played</h4>
-          <SongList
-            showReplay
-            className="room__list"
-            songList={this.props.played}
-            onSongReplay={this.handleReplay}
-            userID={user.id}
-          />
+        </div>
+      </div>
+    );
+
+    const searchModifiers = Object.assign({}, modifiers, {
+      search: true,
+    });
+    const search = (
+      <div className={panelBlock({ extra: roomBlock('panel', searchModifiers) })}>
+        <div className={panelBlock('title')}>
+          <SearchInput />
+        </div>
+        <div className={panelBlock('content')}>
+          <SearchResults />
+        </div>
+      </div>
+    );
+
+    return (
+      <div className={roomBlock({ modifiers })}>
+        {overlay}
+        <div className={roomBlock('content', modifiers)}>
+          <NowPlaying showControls={isHostPage} />
+          {isHostPage && !overlay &&
+            <div className={panelBlock({ extra: roomBlock('panel', Object.assign({}, modifiers, { player: true })) })}>
+              <div className={panelBlock('content')}>
+                <PlayerContainer />
+              </div>
+            </div>
+          }
+          {search}
+          {queue}
+          {played}
         </div>
       </div>
     );

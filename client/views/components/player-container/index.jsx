@@ -38,7 +38,9 @@ export class UnconnectedPlayerContainer extends React.Component {
 
     return (
       <div className="player-container player-container--youtube">
-        {song.service === SongServices.YOUTUBE && <YoutubePlayer />}
+        <div className="player-container__content player-container__content--youtube">
+          {song.service === SongServices.YOUTUBE && <YoutubePlayer />}
+        </div>
       </div>
     );
   }
