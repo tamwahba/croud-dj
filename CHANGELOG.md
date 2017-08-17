@@ -1,3 +1,23 @@
+<a name="0.4.0"></a>
+# [0.4.0](https://github.com/tamwahba/croud-dj/compare/v0.3.0...v0.4.0) (2017-08-17)
+
+
+### Bug Fixes
+
+* **text-input:** allow reuse of component ([6015bfa](https://github.com/tamwahba/croud-dj/commit/6015bfa))
+
+
+### Features
+
+* **guest:** add room guest page ([4b35ac9](https://github.com/tamwahba/croud-dj/commit/4b35ac9))
+* **host:** add host landing page ([8a5c563](https://github.com/tamwahba/croud-dj/commit/8a5c563))
+* **room:** add logo ([532b4df](https://github.com/tamwahba/croud-dj/commit/532b4df))
+* **room:** add overlays for invalid room states ([da59f22](https://github.com/tamwahba/croud-dj/commit/da59f22))
+* **room:** add room styling and layout ([c59c4c3](https://github.com/tamwahba/croud-dj/commit/c59c4c3))
+* **room:** limit user votes to one per song ([803f3ed](https://github.com/tamwahba/croud-dj/commit/803f3ed))
+
+
+
 <a name="0.3.0"></a>
 # [0.3.0](https://github.com/tamwahba/croud-dj/compare/v0.2.0...v0.3.0) (2017-08-06)
 
