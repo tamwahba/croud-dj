@@ -1,6 +1,6 @@
 {
   "name": "croud-dj",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Let your guests vote on what plays next",
   "main": "index.js",
   "private": true,
