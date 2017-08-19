@@ -28,7 +28,7 @@ const loaders = {
     test: /\.(less|css)$/,
     loaders: ['style-loader', 'css-loader', 'postcss-loader', 'less-loader'],
   },
-  svg: { test: /\.svg$/, loader: 'svg-sprite-loader', options: { extract: true, spriteFileName: 'icons.svg' } },
+  svg: { test: /\.svg$/, loader: 'svg-sprite-loader', options: { extract: true, spriteFilename: 'icons.svg' } },
 };
 
 const config = {
@@ -145,12 +145,18 @@ if (IS_PRODUCTION) {
   };
   config.plugins.push(
     new WebpackMd5Hash(),
+    new webpack.HashedModuleIdsPlugin(),
     new ExtractTextPlugin({
       allChunks: true,
-      filename: 'styles.[contenthash].css',
+      filename: 'styles.[chunkhash].css',
     }),
     new webpack.optimize.CommonsChunkPlugin({
       name: 'vendor',
+      minChunks: module => (module.resource && !(/\.(less|css)$/).test(module.resource)) &&
+        (module.context && /node_modules/.test(module.context)),
+    }),
+    new webpack.optimize.CommonsChunkPlugin({
+      name: 'manifest',
       minChunks: Infinity,
     }),
     new webpack.optimize.UglifyJsPlugin({
