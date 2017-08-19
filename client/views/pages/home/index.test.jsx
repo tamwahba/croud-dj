@@ -11,9 +11,9 @@ expect.extend(enzymify());
 describe('views', () => {
   describe('pages', () => {
     describe('home', () => {
-      it('should render a title', () => {
+      it('should have class `home`', () => {
         const home = shallow(<HomePage />);
-        expect(home).toHaveRendered(<h1>Home</h1>);
+        expect(home).toHaveClass('home');
       });
     });
   });

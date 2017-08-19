@@ -22,6 +22,15 @@ const loaders = {
       name: 'fonts/[name].[ext]',
     },
   },
+  image: {
+    test: /\.(gif|jpe?g|png)$/i,
+    loaders: [{
+      loader: 'file-loader',
+      options: {
+        name: 'images/[name].[hash].[ext]',
+      },
+    }, 'img-loader'],
+  },
   js: { test: /\.jsx?$/, exclude: /node_modules/, loader: ['babel-loader'] },
   json: { test: /\.json$/, loader: ['json-loader'] },
   less: {
@@ -77,6 +86,7 @@ if (IS_DEVELOPMENT) {
   config.module = {
     rules: [
       loaders.font,
+      loaders.image,
       loaders.js,
       loaders.less,
       loaders.svg,
@@ -112,6 +122,7 @@ if (IS_PRODUCTION) {
   config.module = {
     rules: [
       loaders.font,
+      loaders.image,
       loaders.js,
       loaders.svg,
       {
@@ -175,6 +186,7 @@ if (IS_TEST) {
   config.module = {
     rules: [
       loaders.font,
+      loaders.image,
       loaders.js,
       loaders.json,
       loaders.less,
