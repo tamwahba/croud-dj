@@ -30,8 +30,6 @@ export class UnconnectedGuestPage extends React.Component {
   }
 
   render() {
-    const { user } = this.props;
-
     return (
       <div className="guest">
         <h4>Join a room</h4>
